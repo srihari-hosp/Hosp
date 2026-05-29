@@ -1,0 +1,57 @@
+{
+	"id": "a1b2c3d4-e5f6-4a5b-bc6d-7e8f9a0b1c2d",
+	"name": "Hosp Local",
+	"values": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3001",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "refreshToken",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "patientId",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "doctorId",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "appointmentId",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "visitId",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "labTestId",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		}
+	],
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "2024-04-30T12:00:00.000Z",
+	"_postman_exported_using": "Postman/10.0.0"
+}

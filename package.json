@@ -1,0 +1,44 @@
+{
+  "name": "hosp",
+  "private": true,
+  "version": "1.0.0",
+  "packageManager": "npm@11.6.2",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev --parallel",
+    "dev:web": "npm --workspace @hosp/web run dev",
+    "dev:api": "npm --workspace @hosp/api run dev",
+    "start": "npm run --workspace @hosp/api start",
+    "lint": "turbo run lint",
+    "type-check": "turbo run type-check",
+    "test": "turbo run test",
+    "build": "turbo run build",
+    "security:api": "npm run --workspace apps/api security:full",
+    "security:zap-baseline": "powershell -ExecutionPolicy Bypass -File scripts/security/run-zap-baseline.ps1",
+    "perf:latency": "npm run --workspace apps/api perf:latency"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "eslint": "^8.57.0",
+    "turbo": "^2.0.11",
+    "typescript": "^5.5.4"
+  },
+  "overrides": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "@types/react": "18.3.27",
+    "@types/react-dom": "18.3.7"
+  },
+  "dependencies": {
+    "@reduxjs/toolkit": "^2.11.2",
+    "react-redux": "^9.2.0"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.57.1"
+  }
+}

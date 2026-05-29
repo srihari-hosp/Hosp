@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "f78a2e1d-3b5c-4c8a-9d2e-1a2b3c4d5e6f",
 		"name": "Hosp API Local",
-		"description": "Collection for testing the Hosp Backend API locally.",
+		"description": "Collection for testing the Hosp Backend API locally.\n\n### Required Environment Variables:\n- `admin_email`: The admin email address\n- `admin_password`: The admin password",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -16,7 +16,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"hospitalName\": \"City General Hospital\",\n    \"address\": \"123 Medical Square, Bangalore\",\n    \"phone\": \"+919876543210\",\n    \"email\": \"admin@citygeneral.com\",\n    \"password\": \"Password123!\",\n    \"licenseNo\": \"HOSP-BGL-001\",\n    \"gstin\": \"29AAAAA0000A1Z5\"\n}",
+							"raw": "{\n    \"hospitalName\": \"City General Hospital\",\n    \"address\": \"123 Medical Square, Bangalore\",\n    \"phone\": \"+919876543210\",\n    \"email\": \"{{admin_email}}\",\n    \"password\": \"{{admin_password}}\",\n    \"licenseNo\": \"HOSP-BGL-001\",\n    \"gstin\": \"29AAAAA0000A1Z5\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -60,7 +60,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"admin@citygeneral.com\",\n    \"password\": \"Password123!\",\n    \"rememberMe\": true\n}",
+							"raw": "{\n    \"email\": \"{{admin_email}}\",\n    \"password\": \"{{admin_password}}\",\n    \"rememberMe\": true\n}",
 							"options": {
 								"raw": {
 									"language": "json"

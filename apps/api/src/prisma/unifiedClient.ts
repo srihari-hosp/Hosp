@@ -274,7 +274,11 @@ export const createUnifiedPrismaClient = (): PrismaClient => {
               return result.filter(item => {
                 if (!item || typeof item !== 'object') return true;
                 if (normalizedModel === 'hospital') return (item as any).id === hospitalId;
-                return !(item as any).hospitalId || (item as any).hospitalId === hospitalId;
+                if (!(item as any).hospitalId) {
+                  console.warn(`[RLS Warning] Tenant-scoped record missing hospitalId in model ${normalizedModel}. Item ID: ${(item as any).id}`);
+                  return true;
+                }
+                return (item as any).hospitalId === hospitalId;
               });
             } else {
               const res = result as any;

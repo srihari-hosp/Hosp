@@ -12,6 +12,7 @@ export const createNotificationsWorker = (): Worker<NotificationJobData> => {
         jobId: job.id,
         type: job.data.type,
         prescriptionId: job.data.prescriptionId,
+        invoiceId: job.data.invoiceId,
         requestedBy: job.data.requestedBy,
       });
     },

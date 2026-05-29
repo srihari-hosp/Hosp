@@ -2,11 +2,11 @@
 DO $$
 BEGIN
   IF EXISTS (
-    SELECT 1
-    FROM pg_constraint
-    WHERE conname = 'Patient_mrn_key'
+    SELECT 1 FROM pg_indexes
+    WHERE schemaname = current_schema()
+      AND indexname = 'Patient_mrn_key'
   ) THEN
-    ALTER TABLE "Patient" DROP CONSTRAINT "Patient_mrn_key";
+    DROP INDEX "Patient_mrn_key";
   END IF;
 END $$;
 

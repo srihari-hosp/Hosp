@@ -1,4 +1,4 @@
-import { createHash, randomUUID, timingSafeEqual } from 'crypto';
+import { createHash, randomInt, randomUUID, timingSafeEqual } from 'crypto';
 import { Router, type CookieOptions, type Request, type Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt, { type JwtPayload, type SignOptions } from 'jsonwebtoken';
@@ -285,8 +285,8 @@ const getAuthenticatedUserId = (req: Request): string => {
 
 const generateBackupCodes = (): string[] => {
   return Array.from({ length: BACKUP_CODE_COUNT }, () => {
-    const partA = Math.floor(1000 + Math.random() * 9000);
-    const partB = Math.floor(1000 + Math.random() * 9000);
+    const partA = randomInt(1000, 10000);
+    const partB = randomInt(1000, 10000);
     return `${partA}-${partB}`;
   });
 };

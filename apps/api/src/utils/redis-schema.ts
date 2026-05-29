@@ -16,7 +16,7 @@ export class RedisSchema {
   // ─── String commands ─────────────────────────────────────────────────────────
 
   async set(key: string, value: string, ttlSeconds?: number): Promise<'OK'> {
-    if (ttlSeconds) {
+    if (ttlSeconds !== undefined) {
       return redis.set(this.k(key), value, 'EX', ttlSeconds) as Promise<'OK'>;
     }
     return redis.set(this.k(key), value) as Promise<'OK'>;

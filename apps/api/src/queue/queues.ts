@@ -61,7 +61,10 @@ export const enqueuePrescriptionPdfGeneration = async (
     jobId: `${payload.hospitalId}__${payload.prescriptionId}`,
   });
 
-  return job.id?.toString() ?? '';
+  if (!job.id) {
+    throw new Error('Missing job.id when enqueuing job');
+  }
+  return job.id.toString();
 };
 
 export const enqueueInvoicePdfGeneration = async (
@@ -71,5 +74,8 @@ export const enqueueInvoicePdfGeneration = async (
     jobId: `${payload.hospitalId}__${payload.invoiceId}`,
   });
 
-  return job.id?.toString() ?? '';
+  if (!job.id) {
+    throw new Error('Missing job.id when enqueuing job');
+  }
+  return job.id.toString();
 };

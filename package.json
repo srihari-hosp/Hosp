@@ -17,7 +17,7 @@
     "test": "turbo run test",
     "build": "turbo run build",
     "security:api": "npm run --workspace apps/api security:full",
-    "security:zap-baseline": "powershell -ExecutionPolicy Bypass -File scripts/security/run-zap-baseline.ps1",
+    "security:zap-baseline": "node -e \"process.platform==='win32'?require('child_process').execSync('powershell -ExecutionPolicy Bypass -File scripts/security/run-zap-baseline.ps1',{stdio:'inherit'}):require('child_process').execSync('bash scripts/security/run-zap-baseline.sh',{stdio:'inherit'})\"",
     "perf:latency": "npm run --workspace apps/api perf:latency"
   },
   "devDependencies": {

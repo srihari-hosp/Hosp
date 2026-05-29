@@ -498,7 +498,7 @@ router.delete(
     const id = req.params.id;
 
     const existing = await prisma.patient.findFirst({
-      where: { id, hospitalId },
+      where: { id, hospitalId, isActive: true },
       select: { id: true },
     });
 
@@ -506,8 +506,9 @@ router.delete(
       throw new NotFoundError('Patient not found');
     }
 
-      const patient = await prisma.patient.delete({
+    const patient = await prisma.patient.update({
       where: { id },
+      data: { isActive: false },
       select: patientSelect,
     });
 

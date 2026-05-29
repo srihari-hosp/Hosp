@@ -45,20 +45,25 @@ describe('OWASP Top 10 security checks', () => {
   });
 
   it('A04 Insecure Design: should enforce rate limiting for repeated requests', async () => {
+    const prevWindow = process.env.RATE_LIMIT_WINDOW_MS;
+    const prevMax = process.env.RATE_LIMIT_MAX;
     process.env.RATE_LIMIT_WINDOW_MS = '60000';
     process.env.RATE_LIMIT_MAX = '2';
-    const app = createApp();
+    try {
+      const app = createApp();
+      const first = await request(app).get('/');
+      const second = await request(app).get('/');
+      const third = await request(app).get('/');
 
-    const first = await request(app).get('/');
-    const second = await request(app).get('/');
-    const third = await request(app).get('/');
-
-    expect(first.status).toBe(200);
-    expect(second.status).toBe(200);
-    expect(third.status).toBe(429);
-    expect(third.body.error).toBe('Too many requests, please try again later.');
-
-    delete process.env.RATE_LIMIT_WINDOW_MS;
-    delete process.env.RATE_LIMIT_MAX;
+      expect(first.status).toBe(200);
+      expect(second.status).toBe(200);
+      expect(third.status).toBe(429);
+      expect(third.body.error).toBe('Too many requests, please try again later.');
+    } finally {
+      if (prevWindow === undefined) delete process.env.RATE_LIMIT_WINDOW_MS;
+      else process.env.RATE_LIMIT_WINDOW_MS = prevWindow;
+      if (prevMax === undefined) delete process.env.RATE_LIMIT_MAX;
+      else process.env.RATE_LIMIT_MAX = prevMax;
+    }
   });
 });

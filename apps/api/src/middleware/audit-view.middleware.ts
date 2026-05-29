@@ -8,7 +8,7 @@ export const auditView = (entityType: string) => {
     const context = getRequestContext();
 
     if (context?.hospitalId) {
-      await prisma.auditLog.create({
+      prisma.auditLog.create({
         data: {
           hospitalId: context.hospitalId,
           userId: context.userId ?? null,
@@ -23,6 +23,9 @@ export const auditView = (entityType: string) => {
           userAgent: context.userAgent ?? req.get('user-agent') ?? null,
           timestamp: new Date(),
         },
+      }).catch((err) => {
+        // Log but don't fail the request
+        console.error('Audit log write failed:', err);
       });
     }
 

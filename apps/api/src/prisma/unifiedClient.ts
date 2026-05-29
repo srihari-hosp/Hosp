@@ -36,6 +36,11 @@ const FILTERABLE_OPERATIONS = new Set([
   'groupBy',
   'updateMany',
   'deleteMany',
+  'update',
+  'delete',
+  'upsert',
+  'findUnique',
+  'findUniqueOrThrow',
 ]);
 
 const WRITE_OPERATIONS = new Set([
@@ -142,24 +147,28 @@ const extractHospitalId = (value: unknown): string | undefined => {
   return undefined;
 };
 
-const enforceTenantInData = (value: unknown, normalizedModel: string, hospitalId: string): void => {
+const enforceTenantInData = (value: unknown, normalizedModel: string, hospitalId: string, isUpdate = false): void => {
   if (!TENANT_MODELS.has(normalizedModel) || !value || typeof value !== 'object') return;
   const data = value as any;
   const existingHospitalId = extractHospitalId(data);
   if (existingHospitalId && existingHospitalId !== hospitalId) {
     throw new Error('Cross-tenant write blocked by RLS middleware');
   }
-  if (!existingHospitalId) data.hospitalId = hospitalId;
+  if (!existingHospitalId && !isUpdate) data.hospitalId = hospitalId;
 };
 
-const appendTenantWhere = (args: any, normalizedModel: string, hospitalId: string): void => {
+const appendTenantWhere = (args: any, normalizedModel: string, hospitalId: string, operation?: string): void => {
   const tenantWhere = getTenantFilter(normalizedModel, hospitalId);
   const existingWhere = args.where;
   if (!existingWhere) {
     args.where = tenantWhere;
     return;
   }
-  args.where = { AND: [existingWhere, tenantWhere] };
+  if (operation && ['update', 'delete', 'upsert', 'findUnique', 'findUniqueOrThrow'].includes(operation)) {
+    args.where = { ...existingWhere, ...tenantWhere };
+  } else {
+    args.where = { AND: [existingWhere, tenantWhere] };
+  }
 };
 
 // --- SENSITIVE DATA HASHING ---
@@ -207,7 +216,7 @@ export const createUnifiedPrismaClient = (): PrismaClient => {
           // 2. Pre-Query RLS Enforcements (Tenant Isolation)
           if (normalizedModel && hospitalId && isRlsModel(normalizedModel)) {
             if (['create', 'update'].includes(operation)) {
-              enforceTenantInData(mutableArgs.data, normalizedModel, hospitalId);
+              enforceTenantInData(mutableArgs.data, normalizedModel, hospitalId, operation === 'update');
             } else if (operation === 'createMany') {
               if (Array.isArray(mutableArgs.data)) {
                 for (const row of mutableArgs.data) enforceTenantInData(row, normalizedModel, hospitalId);
@@ -216,11 +225,11 @@ export const createUnifiedPrismaClient = (): PrismaClient => {
               }
             } else if (operation === 'upsert') {
               enforceTenantInData(mutableArgs.create, normalizedModel, hospitalId);
-              enforceTenantInData(mutableArgs.update, normalizedModel, hospitalId);
+              enforceTenantInData(mutableArgs.update, normalizedModel, hospitalId, true);
             }
 
             if (FILTERABLE_OPERATIONS.has(operation)) {
-              appendTenantWhere(mutableArgs, normalizedModel, hospitalId);
+              appendTenantWhere(mutableArgs, normalizedModel, hospitalId, operation);
             }
           }
 
@@ -249,7 +258,7 @@ export const createUnifiedPrismaClient = (): PrismaClient => {
               );
 
               // Use baseClient to avoid recursion
-              baseClient.auditLog.create({
+              await baseClient.auditLog.create({
                 data: {
                   hospitalId: hId,
                   userId: uId,
@@ -264,7 +273,7 @@ export const createUnifiedPrismaClient = (): PrismaClient => {
                   ipAddress: context?.ipAddress ?? null,
                   userAgent: context?.userAgent ?? null,
                 },
-              }).catch(err => console.error('Failed to create audit log:', err));
+              });
             }
           }
 
@@ -276,13 +285,13 @@ export const createUnifiedPrismaClient = (): PrismaClient => {
                 if (normalizedModel === 'hospital') return (item as any).id === hospitalId;
                 if (!(item as any).hospitalId) {
                   console.warn(`[RLS Warning] Tenant-scoped record missing hospitalId in model ${normalizedModel}. Item ID: ${(item as any).id}`);
-                  return true;
+                  return false;
                 }
                 return (item as any).hospitalId === hospitalId;
               });
             } else {
               const res = result as any;
-              const hIdMatch = normalizedModel === 'hospital' ? res.id === hospitalId : (!res.hospitalId || res.hospitalId === hospitalId);
+              const hIdMatch = normalizedModel === 'hospital' ? res.id === hospitalId : (res.hospitalId === hospitalId);
               if (!hIdMatch) {
                 if (operation === 'findUniqueOrThrow' || operation === 'findFirstOrThrow') {
                   throw new Error('Record not found in tenant scope');

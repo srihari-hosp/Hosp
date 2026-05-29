@@ -31,16 +31,24 @@ async function main() {
   console.log("Created hospital:", hospital.name);
 
   // Create admin user
-  const passwordHash = await bcrypt.hash("Admin@123", 10);
+  const isDev = process.env.NODE_ENV === "development" || !process.env.NODE_ENV;
+  const adminEmail = process.env.SEED_ADMIN_EMAIL || (isDev ? "admin@hospital.com" : null);
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD || (isDev ? "Admin@123" : null);
+
+  if (!adminEmail || !adminPassword) {
+    throw new Error("SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD must be provided in non-development environments.");
+  }
+
+  const passwordHash = await bcrypt.hash(adminPassword, 10);
   const admin = await prisma.user.upsert({
-    where: { email: "admin@hospital.com" },
+    where: { email: adminEmail },
     update: {
       passwordHash,
       role: UserRole.ADMIN,
       hospitalId: hospital.id,
     },
     create: {
-      email: "admin@hospital.com",
+      email: adminEmail,
       passwordHash,
       role: UserRole.ADMIN,
       hospitalId: hospital.id,
@@ -57,6 +65,7 @@ async function main() {
         mrn: "MRN-001",
         name: "Rajesh Kumar",
         age: 45,
+        dateOfBirth: new Date(new Date().setFullYear(new Date().getFullYear() - 45)),
         gender: Gender.MALE,
         phone: "+91-9876543210",
         email: "rajesh.kumar@example.com",
@@ -72,6 +81,7 @@ async function main() {
         mrn: "MRN-002",
         name: "Priya Sharma",
         age: 32,
+        dateOfBirth: new Date(new Date().setFullYear(new Date().getFullYear() - 32)),
         gender: Gender.FEMALE,
         phone: "+91-9876543211",
         email: "priya.sharma@example.com",
@@ -87,6 +97,7 @@ async function main() {
         mrn: "MRN-003",
         name: "Mohammed Ali",
         age: 28,
+        dateOfBirth: new Date(new Date().setFullYear(new Date().getFullYear() - 28)),
         gender: Gender.MALE,
         phone: "+91-9876543212",
         address: "Kukatpally, Hyderabad",

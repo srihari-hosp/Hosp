@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('../prisma/client', () => ({
+vi.mock('../prisma/client.js', () => ({
   prisma: {
     patient: {
       findMany: vi.fn(),

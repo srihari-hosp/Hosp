@@ -331,11 +331,18 @@ router.post(
       select: prescriptionSelect,
     });
 
-    const pdfJobId = await enqueuePrescriptionPdfGeneration({
-      prescriptionId: prescription.id,
-      hospitalId,
-      requestedBy: userId,
-    });
+    let pdfJobId: string;
+    try {
+      pdfJobId = await enqueuePrescriptionPdfGeneration({
+        prescriptionId: prescription.id,
+        hospitalId,
+        requestedBy: userId,
+      });
+    } catch (error) {
+      await prisma.prescription.delete({ where: { id: prescription.id } });
+      console.error('Failed to enqueue PDF generation:', error);
+      throw new AppError('Failed to queue PDF generation. Prescription was rolled back.', 500);
+    }
 
     await logAudit({
       req: req as AuthenticatedRequest,

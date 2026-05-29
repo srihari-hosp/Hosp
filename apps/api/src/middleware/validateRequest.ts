@@ -6,11 +6,34 @@ import { ValidationError } from '../errors/customErrors.js';
 type ClassConstructor<T extends object> = new (...args: unknown[]) => T;
 
 const formatValidationErrors = (
-  errors: ClassValidationError[]
+  errors: ClassValidationError[],
+  parentPath = ''
 ): Array<{ field: string; messages: string[] }> => {
-  return errors.map((error) => ({
-    field: error.property,
-    messages: Object.values(error.constraints ?? {}),
+  const map = new Map<string, string[]>();
+
+  const traverse = (errs: ClassValidationError[], currentPrefix: string) => {
+    for (const error of errs) {
+      const path = currentPrefix ? `${currentPrefix}.${error.property}` : error.property;
+      
+      if (error.constraints) {
+        const messages = Object.values(error.constraints);
+        if (messages.length > 0) {
+          const existing = map.get(path) ?? [];
+          map.set(path, [...existing, ...messages]);
+        }
+      }
+
+      if (error.children && error.children.length > 0) {
+        traverse(error.children, path);
+      }
+    }
+  };
+
+  traverse(errors, parentPath);
+
+  return Array.from(map.entries()).map(([field, messages]) => ({
+    field,
+    messages,
   }));
 };
 

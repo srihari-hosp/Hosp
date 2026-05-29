@@ -8,6 +8,8 @@ import { authorize } from '../middleware/authorize.js';
 import { validateRequest } from '../middleware/validateRequest.js';
 import { prisma } from '../prisma/client.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
+import { encryptText } from '../utils/encryption.js';
+import { hashOptionalSensitiveValue } from '../utils/hash.js';
 import { redisSchema } from '../utils/redis-schema.js';
 
 // Cache TTL constants
@@ -327,6 +329,17 @@ router.post(
     const phone = normalizeIndianMobile(body.phone, 'phone');
     const email = normalizeEmail(body.email);
     const normalizedAddress = body.address?.trim();
+    const aadhaarHash = hashOptionalSensitiveValue(body.aadhaarNumber) ?? null;
+    const aadhaarEncrypted = body.aadhaarNumber ? encryptText(body.aadhaarNumber) : null;
+    
+    let computedDateOfBirth: Date;
+    if (body.dateOfBirth) {
+      computedDateOfBirth = new Date(body.dateOfBirth);
+    } else {
+      const now = new Date();
+      now.setFullYear(now.getFullYear() - body.age);
+      computedDateOfBirth = now;
+    }
 
     try {
       let patient;
@@ -335,12 +348,15 @@ router.post(
           data: {
             hospitalId,
             mrn: body.mrn.trim(),
+            aadhaarHash,
+            aadhaarEncrypted,
             name: body.name.trim(),
             age: body.age,
             gender: body.gender,
             phone,
             email,
             address: normalizedAddress,
+            dateOfBirth: computedDateOfBirth,
             patientType: body.patientType,
           },
           select: patientSelect,
@@ -369,12 +385,15 @@ router.post(
           INSERT INTO "Patient" (
             "id",
             "mrn",
+            "aadhaarHash",
+            "aadhaarEncrypted",
             "name",
             "age",
             "gender",
             "phone",
             "email",
             "address",
+            "dateOfBirth",
             "patientType",
             "hospitalId",
             "createdAt",
@@ -383,12 +402,15 @@ router.post(
           VALUES (
             ${randomUUID()},
             ${body.mrn.trim()},
+            ${aadhaarHash},
+            ${aadhaarEncrypted},
             ${body.name.trim()},
             ${body.age},
             ${body.gender}::"Gender",
             ${phone},
             ${email ?? null},
             ${normalizedAddress ?? null},
+            ${computedDateOfBirth},
             ${body.patientType}::"PatientType",
             ${hospitalId},
             NOW(),
@@ -445,6 +467,8 @@ router.patch(
     const phone =
       body.phone !== undefined ? normalizeIndianMobile(body.phone, 'phone') : undefined;
     const email = body.email !== undefined ? normalizeEmail(body.email) : undefined;
+    const aadhaarHash = body.aadhaarNumber !== undefined ? hashOptionalSensitiveValue(body.aadhaarNumber) : undefined;
+    const aadhaarEncrypted = body.aadhaarNumber !== undefined ? (body.aadhaarNumber ? encryptText(body.aadhaarNumber) : null) : undefined;
 
     const existing = await prisma.patient.findFirst({
       where: { id, hospitalId },
@@ -460,6 +484,7 @@ router.patch(
         where: { id },
         data: {
           ...(body.mrn !== undefined ? { mrn: body.mrn.trim() } : {}),
+          ...(body.aadhaarNumber !== undefined ? { aadhaarHash, aadhaarEncrypted } : {}),
           ...(body.name !== undefined ? { name: body.name.trim() } : {}),
           ...(body.age !== undefined ? { age: body.age } : {}),
           ...(body.gender !== undefined ? { gender: body.gender } : {}),

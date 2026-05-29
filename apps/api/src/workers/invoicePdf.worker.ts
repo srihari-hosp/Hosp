@@ -57,7 +57,7 @@ export const createInvoicePdfWorker = (): Worker<InvoicePdfJobData, InvoicePdfJo
     },
     {
       connection: bullmqConnection,
-      concurrency: Number(process.env.PDF_WORKER_CONCURRENCY ?? 2),
+      concurrency: Math.max(1, parseInt(process.env.PDF_WORKER_CONCURRENCY ?? '2', 10) || 2),
     }
   );
 

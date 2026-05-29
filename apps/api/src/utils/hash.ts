@@ -3,7 +3,14 @@ import { createHmac } from 'crypto';
 const HASH_PREFIX = 'h$';
 
 const getHashSecret = (): string => {
-  return process.env.DATA_HASH_SECRET || 'dev-data-hash-secret-change-me';
+  const secret = process.env.DATA_HASH_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('DATA_HASH_SECRET must be set in production');
+    }
+    return 'dev-data-hash-secret-change-me';
+  }
+  return secret;
 };
 
 export const hashSensitiveValue = (value: string): string => {

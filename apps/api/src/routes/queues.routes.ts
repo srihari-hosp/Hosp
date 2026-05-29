@@ -21,10 +21,10 @@ const getJobSnapshot = async (queue: Queue, jobId: string) => {
     name: job.name,
     state,
     attemptsMade: job.attemptsMade,
-    failedReason: job.failedReason || null,
+    failedReason: job.failedReason ? 'Job failed' : null,
     processedOn: job.processedOn ?? null,
     finishedOn: job.finishedOn ?? null,
-    returnvalue: job.returnvalue ?? null,
+    returnvalue: null,
   };
 };
 

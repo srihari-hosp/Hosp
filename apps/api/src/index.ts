@@ -30,7 +30,13 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   logger.info('API started', { 
     port: PORT,
     nodeEnv: process.env.NODE_ENV,
-    dbHost: process.env.DATABASE_URL ? new URL(process.env.DATABASE_URL).hostname : 'unknown'
+    dbHost: (() => {
+      try {
+        return process.env.DATABASE_URL ? new URL(process.env.DATABASE_URL).hostname : 'unknown';
+      } catch {
+        return 'invalid-url';
+      }
+    })()
   });
 });
 

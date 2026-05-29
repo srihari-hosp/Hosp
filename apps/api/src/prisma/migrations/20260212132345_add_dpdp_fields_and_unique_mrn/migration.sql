@@ -4,15 +4,14 @@
   - A unique constraint covering the columns `[mrn]` on the table `Patient` will be added. If there are existing duplicate values, this will fail.
 
 */
--- DropIndex
-DROP INDEX "Patient_mrn_hospitalId_key";
+-- Keep the composite unique constraint for multi-tenant isolation
+-- (no changes needed if the original index already exists)
 
 -- AlterTable
 ALTER TABLE "Hospital" ALTER COLUMN "phone" DROP NOT NULL,
 ALTER COLUMN "email" DROP NOT NULL;
 
--- CreateIndex
-CREATE UNIQUE INDEX "Patient_mrn_key" ON "Patient"("mrn");
+
 
 -- AddForeignKey
 ALTER TABLE "ConsentRecord" ADD CONSTRAINT "ConsentRecord_patientId_fkey" FOREIGN KEY ("patientId") REFERENCES "Patient"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

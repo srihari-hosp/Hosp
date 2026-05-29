@@ -17,6 +17,8 @@ const consentSelect = {
   grantedAt: true,
   revokedAt: true,
   status: true,
+  dataTypes: true,
+  expiryAt: true,
   patientId: true,
   hospitalId: true,
   patient: {
@@ -260,6 +262,8 @@ router.post(
         patientId,
         purpose: purpose.trim(),
         status: 'GRANTED',
+        dataTypes,
+        expiryAt: expiryAt ? new Date(expiryAt) : null,
       },
       select: consentSelect,
     });

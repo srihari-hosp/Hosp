@@ -4,7 +4,10 @@ const IV_LENGTH = 12;
 const AUTH_TAG_LENGTH = 16;
 
 const getEncryptionKey = (): Buffer => {
-  const configured = process.env.MFA_ENCRYPTION_KEY ?? 'dev-mfa-encryption-key-change-me';
+  const configured = process.env.MFA_ENCRYPTION_KEY;
+  if (!configured) {
+    throw new Error('MFA_ENCRYPTION_KEY is required');
+  }
   return createHash('sha256').update(configured).digest();
 };
 

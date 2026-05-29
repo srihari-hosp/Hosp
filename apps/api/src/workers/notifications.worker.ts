@@ -4,6 +4,10 @@ import { bullmqConnection } from '../queue/connection.js';
 import { QUEUE_NAMES, type NotificationJobData } from '../queue/types.js';
 
 export const createNotificationsWorker = (): Worker<NotificationJobData> => {
+  const parsedConcurrency = Number(process.env.NOTIFICATIONS_WORKER_CONCURRENCY ?? 5);
+  const concurrency =
+    Number.isInteger(parsedConcurrency) && parsedConcurrency > 0 ? parsedConcurrency : 5;
+
   const worker = new Worker<NotificationJobData>(
     QUEUE_NAMES.NOTIFICATIONS,
     async (job) => {
@@ -18,7 +22,7 @@ export const createNotificationsWorker = (): Worker<NotificationJobData> => {
     },
     {
       connection: bullmqConnection,
-      concurrency: Number(process.env.NOTIFICATIONS_WORKER_CONCURRENCY ?? 5),
+      concurrency,
     }
   );
 

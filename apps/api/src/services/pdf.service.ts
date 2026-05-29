@@ -634,29 +634,39 @@ export class PdfService {
       `${prescription.id}.pdf`
     );
     const absolutePath = path.join(getStorageRoot(), relativePath);
+    const tempPath = absolutePath + '.tmp';
     await fs.mkdir(path.dirname(absolutePath), { recursive: true });
-    await fs.writeFile(absolutePath, Buffer.from(pdfBytes));
 
-    const normalizedRelativePath = relativePath.replace(/\\/g, '/');
-    const pdfUrl = `${getPublicBaseUrl()}/uploads/${normalizedRelativePath}`;
-    const generatedAt = new Date();
+    try {
+      await fs.writeFile(tempPath, Buffer.from(pdfBytes));
 
-    await prisma.prescription.updateMany({
-      where: {
-        visitId: prescription.visitId,
-      },
-      data: {
+      const normalizedRelativePath = relativePath.replace(/\\/g, '/');
+      const pdfUrl = `${getPublicBaseUrl()}/uploads/${normalizedRelativePath}`;
+      const generatedAt = new Date();
+
+      await prisma.prescription.updateMany({
+        where: {
+          visitId: prescription.visitId,
+          hospitalId: input.hospitalId,
+        },
+        data: {
+          pdfPath: normalizedRelativePath,
+          pdfUrl,
+          pdfGeneratedAt: generatedAt,
+        },
+      });
+
+      await fs.rename(tempPath, absolutePath);
+
+      return {
         pdfPath: normalizedRelativePath,
         pdfUrl,
-        pdfGeneratedAt: generatedAt,
-      },
-    });
-
-    return {
-      pdfPath: normalizedRelativePath,
-      pdfUrl,
-      generatedAt,
-    };
+        generatedAt,
+      };
+    } catch (error) {
+      await fs.unlink(tempPath).catch(() => {});
+      throw error;
+    }
   }
 
   public async generateInvoicePdf(input: GenerateInvoicePdfInput): Promise<GeneratedPdf> {
@@ -756,28 +766,37 @@ export class PdfService {
 
     const relativePath = path.join('invoices', invoice.hospitalId, `${invoice.id}.pdf`);
     const absolutePath = path.join(getStorageRoot(), relativePath);
+    const tempPath = absolutePath + '.tmp';
     await fs.mkdir(path.dirname(absolutePath), { recursive: true });
-    await fs.writeFile(absolutePath, Buffer.from(pdfBytes));
 
-    const normalizedRelativePath = relativePath.replace(/\\/g, '/');
-    const pdfUrl = `${getPublicBaseUrl()}/uploads/${normalizedRelativePath}`;
-    const generatedAt = new Date();
+    try {
+      await fs.writeFile(tempPath, Buffer.from(pdfBytes));
 
-    await prisma.$executeRaw`
-      UPDATE "Invoice"
-      SET
-        "pdfPath" = ${normalizedRelativePath},
-        "pdfUrl" = ${pdfUrl},
-        "pdfGeneratedAt" = ${generatedAt},
-        "updatedAt" = NOW()
-      WHERE "id" = ${invoice.id}
-    `;
+      const normalizedRelativePath = relativePath.replace(/\\/g, '/');
+      const pdfUrl = `${getPublicBaseUrl()}/uploads/${normalizedRelativePath}`;
+      const generatedAt = new Date();
 
-    return {
-      pdfPath: normalizedRelativePath,
-      pdfUrl,
-      generatedAt,
-    };
+      await prisma.$executeRaw`
+        UPDATE "Invoice"
+        SET
+          "pdfPath" = ${normalizedRelativePath},
+          "pdfUrl" = ${pdfUrl},
+          "pdfGeneratedAt" = ${generatedAt},
+          "updatedAt" = NOW()
+        WHERE "id" = ${invoice.id}
+      `;
+
+      await fs.rename(tempPath, absolutePath);
+
+      return {
+        pdfPath: normalizedRelativePath,
+        pdfUrl,
+        generatedAt,
+      };
+    } catch (error) {
+      await fs.unlink(tempPath).catch(() => {});
+      throw error;
+    }
   }
 }
 

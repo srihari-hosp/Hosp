@@ -11,7 +11,16 @@ BEGIN
 END $$;
 
 ALTER TABLE "Patient"
-ADD COLUMN IF NOT EXISTS "dateOfBirth" TIMESTAMP(3),
+ADD COLUMN IF NOT EXISTS "dateOfBirth" TIMESTAMP(3);
+
+UPDATE "Patient" 
+SET "dateOfBirth" = NOW() - ("age" || ' years')::interval 
+WHERE "dateOfBirth" IS NULL;
+
+ALTER TABLE "Patient" 
+ALTER COLUMN "dateOfBirth" SET NOT NULL;
+
+ALTER TABLE "Patient"
 ADD COLUMN IF NOT EXISTS "bloodGroup" TEXT,
 ADD COLUMN IF NOT EXISTS "emergencyContactName" TEXT,
 ADD COLUMN IF NOT EXISTS "emergencyContactPhone" TEXT,

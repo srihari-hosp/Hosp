@@ -282,7 +282,7 @@ router.get(
     const cacheKey = 'doctors:active';
 
     // Try cache first
-    const cached = await cache.getJson<typeof doctorSelect[]>(cacheKey);
+    const cached = await cache.getJson<Prisma.DoctorGetPayload<{ select: typeof doctorSelect }>[]>(cacheKey);
     if (cached !== null) {
       return res.status(200).json({ doctors: cached, fromCache: true });
     }

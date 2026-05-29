@@ -16,7 +16,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"hospitalName\": \"Apollo Healthcare\",\n    \"address\": \"Main St, Bangalore\",\n    \"phone\": \"+919876543210\",\n    \"email\": \"admin@apollo-test.com\",\n    \"password\": \"Password123!\",\n    \"licenseNo\": \"LIC-2026-PROD-01\",\n    \"gstin\": \"29AAAAA0000A1Z5\"\n}",
+							"raw": "{\n    \"hospitalName\": \"Apollo Healthcare\",\n    \"address\": \"Main St, Bangalore\",\n    \"phone\": \"+919876543210\",\n    \"email\": \"{{admin_email}}\",\n    \"password\": \"{{admin_password}}\",\n    \"licenseNo\": \"LIC-2026-PROD-01\",\n    \"gstin\": \"29AAAAA0000A1Z5\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -45,10 +45,10 @@
 								"exec": [
 									"var jsonData = pm.response.json();",
 									"if (jsonData.accessToken) {",
-									"    pm.collectionVariables.set(\"token\", jsonData.accessToken);",
+									"    pm.environment.set(\"access_token\", jsonData.accessToken);",
 									"}",
 									"if (jsonData.refreshToken) {",
-									"    pm.collectionVariables.set(\"refreshToken\", jsonData.refreshToken);",
+									"    pm.environment.set(\"refresh_token\", jsonData.refreshToken);",
 									"}"
 								],
 								"type": "text/javascript"
@@ -60,7 +60,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"admin@apollo-test.com\",\n    \"password\": \"Password123!\",\n    \"rememberMe\": true\n}",
+							"raw": "{\n    \"email\": \"{{admin_email}}\",\n    \"password\": \"{{admin_password}}\",\n    \"rememberMe\": true\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -107,10 +107,10 @@
 								"exec": [
 									"var jsonData = pm.response.json();",
 									"if (jsonData.accessToken) {",
-									"    pm.collectionVariables.set(\"token\", jsonData.accessToken);",
+									"    pm.environment.set(\"access_token\", jsonData.accessToken);",
 									"}",
 									"if (jsonData.refreshToken) {",
-									"    pm.collectionVariables.set(\"refreshToken\", jsonData.refreshToken);",
+									"    pm.environment.set(\"refresh_token\", jsonData.refreshToken);",
 									"}"
 								],
 								"type": "text/javascript"
@@ -122,7 +122,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"refreshToken\": \"{{refreshToken}}\"\n}",
+							"raw": "{\n    \"refreshToken\": \"{{refresh_token}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -227,7 +227,7 @@
 		"bearer": [
 			{
 				"key": "token",
-				"value": "{{token}}",
+				"value": "{{access_token}}",
 				"type": "string"
 			}
 		]

@@ -1,6 +1,6 @@
 import type { RedisOptions } from 'ioredis';
 
-const redisUrl = process.env.REDIS_URL ?? 'redis://localhost:6379';
+const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
 const parsedRedisUrl = new URL(redisUrl);
 
 const parsedDb = parsedRedisUrl.pathname.length > 1

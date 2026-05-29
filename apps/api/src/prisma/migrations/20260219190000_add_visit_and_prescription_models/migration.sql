@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS "Prescription" (
   "visitId" TEXT NOT NULL,
   "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "updatedAt" TIMESTAMP(3) NOT NULL,
+  CONSTRAINT "Prescription_durationDays_check" CHECK ("durationDays" > 0),
   CONSTRAINT "Prescription_pkey" PRIMARY KEY ("id")
 );
 

@@ -87,15 +87,16 @@ model RefreshToken {
 
 model Patient {
   id          String      @id @default(uuid())
-  mrn         String
-  aadhaarNumber String?
+  mrn              String
+  aadhaarHash      String?
+  aadhaarEncrypted String?
   name        String
   age         Int
   gender      Gender
   phone       String
   email       String?
   address     String?
-  dateOfBirth DateTime?
+  dateOfBirth DateTime
   bloodGroup  String?
   emergencyContactName  String?
   emergencyContactPhone String?
@@ -127,7 +128,7 @@ model Patient {
   @@index([hospitalId, name])
   @@index([hospitalId, phone])
   @@unique([hospitalId, mrn])
-  @@unique([hospitalId, aadhaarNumber])
+  @@unique([hospitalId, aadhaarHash])
 }
 
 model Doctor {

@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 30
+    },
+    "auditLog": "C:\\Users\\GOWTHAMI\\Desktop\\Hosp\\apps\\api\\logs\\.be762479af3e374708956fbf8ec486d6c69d4658-audit.json",
+    "files": [
+        {
+            "date": 1780070459902,
+            "name": "C:\\Users\\GOWTHAMI\\Desktop\\Hosp\\apps\\api\\logs\\error-2026-05-29.log",
+            "hash": "0addb93495e696be3edd952f96c6cb1f3015420b4dd0c2d3cd117a3d62ebc162"
+        }
+    ],
+    "hashType": "sha256"
+}

@@ -1,10 +1,18 @@
 #!/usr/bin/env node
 
 const targetUrl = process.argv[2] || process.env.PERF_TARGET_URL || 'http://localhost:3001/health';
-const totalRequests = Number(process.env.PERF_TOTAL_REQUESTS || 300);
-const concurrency = Number(process.env.PERF_CONCURRENCY || 20);
-const p95SlaMs = Number(process.env.PERF_SLA_P95_MS || 300);
-const requestTimeoutMs = Number(process.env.PERF_REQUEST_TIMEOUT_MS || 5000);
+const asPositiveInt = (raw, fallback, name) => {
+  const n = Number(raw ?? fallback);
+  if (!Number.isFinite(n) || n <= 0 || !Number.isInteger(n)) {
+    throw new Error(`${name} must be a positive integer`);
+  }
+  return n;
+};
+
+const totalRequests = asPositiveInt(process.env.PERF_TOTAL_REQUESTS, 300, 'PERF_TOTAL_REQUESTS');
+const concurrency = asPositiveInt(process.env.PERF_CONCURRENCY, 20, 'PERF_CONCURRENCY');
+const p95SlaMs = asPositiveInt(process.env.PERF_SLA_P95_MS, 300, 'PERF_SLA_P95_MS');
+const requestTimeoutMs = asPositiveInt(process.env.PERF_REQUEST_TIMEOUT_MS, 5000, 'PERF_REQUEST_TIMEOUT_MS');
 
 const latencies = [];
 let failures = 0;
@@ -61,7 +69,7 @@ const main = async () => {
     `Running latency SLA check: url=${targetUrl}, totalRequests=${totalRequests}, concurrency=${concurrency}, p95SlaMs=${p95SlaMs}`
   );
 
-  const workers = Array.from({ length: Math.max(1, concurrency) }, () => worker());
+  const workers = Array.from({ length: concurrency }, () => worker());
   await Promise.all(workers);
 
   const successCount = latencies.length;

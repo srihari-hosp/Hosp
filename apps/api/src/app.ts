@@ -11,7 +11,7 @@ import { logger } from './logger/index.js';
 import { authenticate, type AuthenticatedRequest } from './middleware/authenticate.js';
 import { authorize } from './middleware/authorize.js';
 import { errorHandler } from './middleware/errorHandler.js';
-import { createUnifiedPrismaClient as createPrismaClient } from './prisma/unifiedClient.js';
+import { prisma } from './prisma/unifiedClient.js';
 import { authRouter } from './routes/auth.routes.js';
 import { appointmentsRouter } from './routes/appointments.routes.js';
 import { consentsRouter } from './routes/consents.routes.js';
@@ -23,8 +23,6 @@ import { invoicesRouter } from './routes/invoices.routes.js';
 import { pharmacyRouter } from './routes/pharmacy.routes.js';
 import { labsRouter } from './routes/labs.routes.js';
 import { dashboardRouter } from './routes/dashboard.routes.js';
-
-const prisma = createPrismaClient();
 
 export const createApp = () => {
   const app = express();
@@ -125,18 +123,15 @@ export const createApp = () => {
 
   app.use((req, _res, next) => {
     logger.info(`Incoming request: ${req.method} ${req.path}`);
-    const headerActor = req.header('x-actor');
-    const headerUserId = req.header('x-user-id');
-    const headerHospitalId = req.header('x-hospital-id');
     const headerConsentVersion = req.header('x-consent-version');
     const headerPurpose = req.header('x-purpose');
     const headerRetentionPolicy = req.header('x-retention-policy');
 
     runWithRequestContext(
       {
-        actor: headerActor ?? headerUserId ?? undefined,
-        userId: headerUserId ?? undefined,
-        hospitalId: headerHospitalId ?? undefined,
+        actor: undefined,
+        userId: undefined,
+        hospitalId: undefined,
         consentVersion: headerConsentVersion ?? undefined,
         purpose: headerPurpose ?? undefined,
         retentionPolicy: headerRetentionPolicy ?? undefined,

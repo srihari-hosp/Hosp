@@ -62,7 +62,7 @@
 	],
 	"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
 	"variable": [
-		{ "key": "baseUrl", "value": "https://hosp-production-1719.up.railway.app", "type": "string" },
+		{ "key": "baseUrl", "value": "https://<set-in-environment>", "type": "string" },
 		{ "key": "token", "value": "", "type": "string" },
 		{ "key": "patientId", "value": "", "type": "string" },
 		{ "key": "doctorId", "value": "", "type": "string" },

@@ -8,7 +8,7 @@ const { enqueuePrescriptionPdfGeneration } = vi.hoisted(() => ({
   enqueuePrescriptionPdfGeneration: vi.fn(),
 }));
 
-vi.mock('../prisma/client', () => ({
+vi.mock('../prisma/client.js', () => ({
   prisma: {
     appointment: {
       findFirst: vi.fn(),

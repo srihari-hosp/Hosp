@@ -702,7 +702,7 @@ router.post(
     if (refreshToken) {
       try {
         const decoded = decodeRefreshToken(refreshToken);
-        revokeRefreshToken(decoded);
+        await revokeRefreshToken(decoded);
       } catch {
         // Keep logout idempotent even when token is already invalid/expired.
       }

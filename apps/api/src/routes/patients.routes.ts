@@ -492,6 +492,7 @@ router.patch(
           ...(body.email !== undefined ? { email: email ?? null } : {}),
           ...(body.address !== undefined ? { address: body.address.trim() } : {}),
           ...(body.patientType !== undefined ? { patientType: body.patientType } : {}),
+          ...(body.isActive !== undefined ? { isActive: body.isActive } : {}),
         },
         select: patientSelect,
       });

@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from 'express';
+import { Prisma } from '@prisma/client';
 import { AppError } from '../errors/AppError.js';
 import { logger } from '../logger/index.js';
 
@@ -26,10 +27,8 @@ export const errorHandler = (
 
   if (err instanceof AppError) {
     appError = err;
-  } else if (err && typeof err === 'object' && 'code' in err && (err as any).constructor.name === 'PrismaClientKnownRequestError') {
-    // Handle Prisma specific errors without requiring full import if possible, 
-    // but check for P2002 specifically
-    const prismaErr = err as any;
+  } else if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    const prismaErr = err;
     if (prismaErr.code === 'P2002') {
       const target = prismaErr.meta?.target;
       const fields = Array.isArray(target) ? target.join(', ') : 'fields';

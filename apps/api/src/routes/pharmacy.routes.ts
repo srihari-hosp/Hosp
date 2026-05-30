@@ -115,6 +115,8 @@ type PharmacyTxClient = {
   stockBatch: {
     findFirst: (args: unknown) => Promise<StockBatchEntity | null>;
     update: (args: unknown) => Promise<StockBatchEntity>;
+    updateMany: (args: unknown) => Promise<{ count: number }>;
+    findFirstOrThrow: (args: unknown) => Promise<StockBatchEntity>;
   };
   dispenseRecord: {
     create: (args: unknown) => Promise<DispenseRecordEntity>;
@@ -509,6 +511,10 @@ router.get(
     const { hospitalId } = getHospitalAndUser(req as AuthenticatedRequest);
     const search = typeof req.query.search === 'string' ? req.query.search.trim() : '';
     const schedule = typeof req.query.schedule === 'string' ? req.query.schedule.toUpperCase() : undefined;
+    const allowedSchedules = new Set(['OTC', 'H', 'H1', 'X', 'NARCOTIC']);
+    if (schedule !== undefined && !allowedSchedules.has(schedule)) {
+      throw new ValidationError('schedule must be one of OTC, H, H1, X, NARCOTIC');
+    }
     const isActiveQuery = typeof req.query.isActive === 'string' ? req.query.isActive : undefined;
     const isActive =
       isActiveQuery === undefined ? undefined : isActiveQuery.toLowerCase() === 'true' ? true : isActiveQuery.toLowerCase() === 'false' ? false : undefined;
@@ -858,6 +864,9 @@ router.patch(
       after: batch,
     });
 
+    const cache = redisSchema(hospitalId, 'pharmacy');
+    await cache.clear();
+
     res.status(200).json({ success: true, message: 'Stock batch updated successfully', batch });
   })
 );
@@ -920,23 +929,30 @@ router.post(
         throw new ValidationError('No valid non-expired stock batch available');
       }
 
-      if (batch.availableQty < body.quantity) {
-        throw new ValidationError('Insufficient stock in selected batch');
-      }
-
       const unitPrice = decimalRound(toDecimal(medicine.unitPrice));
       const gstRate = decimalRound(toDecimal(medicine.gstRate));
       const subtotal = decimalRound(unitPrice.mul(body.quantity));
       const gstAmount = decimalRound(subtotal.mul(gstRate).div(100));
       const totalAmount = decimalRound(subtotal.plus(gstAmount));
 
-      const updatedBatch = await tx.stockBatch.update({
-        where: { id: batch.id },
-        data: {
-          availableQty: {
-            decrement: body.quantity,
-          },
+      const { count } = await tx.stockBatch.updateMany({
+        where: {
+          id: batch.id,
+          availableQty: { gte: body.quantity },
+          hospitalId,
+          medicineId: medicine.id,
+          isActive: true,
+          expiryDate: { gte: expiryFloor },
         },
+        data: { availableQty: { decrement: body.quantity } },
+      });
+
+      if (count === 0) {
+        throw new ValidationError('Insufficient stock in selected batch');
+      }
+
+      const updatedBatch = await tx.stockBatch.findFirstOrThrow({
+        where: { id: batch.id },
         select: stockBatchSelect,
       });
 
@@ -990,6 +1006,9 @@ router.post(
         },
       }),
     ]);
+
+    const cache = redisSchema(hospitalId, 'pharmacy');
+    await cache.clear();
 
     res.status(201).json({
       success: true,

@@ -1,5 +1,5 @@
 import { Queue } from 'bullmq';
-import { bullmqConnection } from './connection.js';
+import { bullmqConnection, bullmqPrefix } from './connection.js';
 import {
   type InvoicePdfJobData,
   type InvoicePdfJobResult,
@@ -25,12 +25,14 @@ export const pdfGenerationQueue = new Queue<PdfGenerationJobData, PdfGenerationJ
   QUEUE_NAMES.PDF_GENERATION,
   {
     connection: bullmqConnection,
+    prefix: bullmqPrefix,
     defaultJobOptions,
   }
 );
 
 export const notificationsQueue = new Queue<NotificationJobData>(QUEUE_NAMES.NOTIFICATIONS, {
   connection: bullmqConnection,
+  prefix: bullmqPrefix,
   defaultJobOptions,
 });
 
@@ -38,12 +40,14 @@ export const invoicePdfQueue = new Queue<InvoicePdfJobData, InvoicePdfJobResult>
   QUEUE_NAMES.INVOICE_PDF,
   {
     connection: bullmqConnection,
+    prefix: bullmqPrefix,
     defaultJobOptions,
   }
 );
 
 export const dataArchivalQueue = new Queue<DataArchivalJobData>(QUEUE_NAMES.DATA_ARCHIVAL, {
   connection: bullmqConnection,
+  prefix: bullmqPrefix,
   defaultJobOptions,
 });
 

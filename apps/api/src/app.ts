@@ -156,8 +156,10 @@ export const createApp = () => {
       typeof req.query.entityType === 'string' ? req.query.entityType : undefined;
     const entityId = typeof req.query.entityId === 'string' ? req.query.entityId : undefined;
     const userId = typeof req.query.userId === 'string' ? req.query.userId : undefined;
-    const headerHospitalId =
-      (req as AuthenticatedRequest).user?.hospitalId ?? req.header('x-hospital-id') ?? undefined;
+    const hospitalId = (req as AuthenticatedRequest).user?.hospitalId;
+    if (!hospitalId) {
+      throw new AppError('Hospital context missing', 403);
+    }
     const limitParam = typeof req.query.limit === 'string' ? Number(req.query.limit) : NaN;
     const take = Number.isFinite(limitParam)
       ? Math.max(1, Math.min(200, Math.floor(limitParam)))
@@ -166,7 +168,7 @@ export const createApp = () => {
     try {
       const logs = await prisma.auditLog.findMany({
         where: {
-          ...(headerHospitalId ? { hospitalId: headerHospitalId } : {}),
+          hospitalId,
           ...(entityType ? { entityType } : {}),
           ...(entityId ? { entityId } : {}),
           ...(userId ? { userId } : {}),

@@ -36,8 +36,10 @@ export const authenticate = (
     return next(new AppError('Unauthorized', 401));
   }
 
+  const secret = getAccessTokenSecret();
+
   try {
-    const decoded = jwt.verify(token, getAccessTokenSecret()) as AuthTokenPayload;
+    const decoded = jwt.verify(token, secret, { algorithms: ['HS256'] }) as AuthTokenPayload;
     const tenantId = decoded.tenantId ?? decoded.hospitalId;
 
     if (!tenantId) {

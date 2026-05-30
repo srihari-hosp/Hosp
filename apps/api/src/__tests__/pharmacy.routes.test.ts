@@ -6,6 +6,8 @@ const txPrescriptionFindFirst = vi.fn();
 const txMedicineFindFirst = vi.fn();
 const txStockBatchFindFirst = vi.fn();
 const txStockBatchUpdate = vi.fn();
+const txStockBatchUpdateMany = vi.fn();
+const txStockBatchFindFirstOrThrow = vi.fn();
 const txDispenseCreate = vi.fn();
 
 vi.mock('../prisma/client', () => ({
@@ -35,7 +37,12 @@ vi.mock('../prisma/client', () => ({
       callback({
         prescription: { findFirst: txPrescriptionFindFirst },
         medicine: { findFirst: txMedicineFindFirst },
-        stockBatch: { findFirst: txStockBatchFindFirst, update: txStockBatchUpdate },
+        stockBatch: { 
+          findFirst: txStockBatchFindFirst, 
+          update: txStockBatchUpdate,
+          updateMany: txStockBatchUpdateMany,
+          findFirstOrThrow: txStockBatchFindFirstOrThrow
+        },
         dispenseRecord: { create: txDispenseCreate },
       })
     ),
@@ -164,7 +171,8 @@ describe('Pharmacy API', () => {
       createdAt: new Date('2026-02-01T00:00:00.000Z'),
       updatedAt: new Date('2026-02-01T00:00:00.000Z'),
     });
-    txStockBatchUpdate.mockResolvedValue({
+    txStockBatchUpdateMany.mockResolvedValue({ count: 1 });
+    txStockBatchFindFirstOrThrow.mockResolvedValue({
       id: 'ffffffff-ffff-4fff-8fff-ffffffffffff',
       batchNo: 'BATCH-001',
       vendorName: 'Vendor',
@@ -214,7 +222,7 @@ describe('Pharmacy API', () => {
 
     expect(response.status).toBe(201);
     expect(response.body.stockBatch.availableQty).toBe(8);
-    expect(txStockBatchUpdate).toHaveBeenCalledWith(
+    expect(txStockBatchUpdateMany).toHaveBeenCalledWith(
       expect.objectContaining({
         data: {
           availableQty: {

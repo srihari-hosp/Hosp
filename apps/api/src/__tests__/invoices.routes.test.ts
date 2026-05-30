@@ -10,9 +10,13 @@ const txInvoiceFindFirst = vi.fn();
 const txInvoiceCreate = vi.fn();
 const txPaymentCreate = vi.fn();
 const txInvoiceUpdate = vi.fn();
+const txInvoiceUpdateMany = vi.fn();
+const txInvoiceFindUnique = vi.fn();
 const { enqueueInvoicePdfGeneration } = vi.hoisted(() => ({
   enqueueInvoicePdfGeneration: vi.fn(),
 }));
+
+const txAuditLogCreate = vi.fn();
 
 vi.mock('../prisma/client', () => ({
   prisma: {
@@ -31,8 +35,9 @@ vi.mock('../prisma/client', () => ({
         patient: { findFirst: txPatientFindFirst },
         visit: { findFirst: txVisitFindFirst },
         tariffItem: { findFirst: txTariffFindFirst },
-        invoice: { findFirst: txInvoiceFindFirst, create: txInvoiceCreate, update: txInvoiceUpdate },
+        invoice: { findFirst: txInvoiceFindFirst, create: txInvoiceCreate, update: txInvoiceUpdate, updateMany: txInvoiceUpdateMany, findUnique: txInvoiceFindUnique },
         payment: { create: txPaymentCreate },
+        auditLog: { create: txAuditLogCreate },
       })
     ),
   },
@@ -77,6 +82,8 @@ describe('Invoices API', () => {
     txInvoiceCreate.mockReset();
     txPaymentCreate.mockReset();
     txInvoiceUpdate.mockReset();
+    txInvoiceUpdateMany.mockReset();
+    txInvoiceFindUnique.mockReset();
     enqueueInvoicePdfGeneration.mockReset();
     mockedPrisma.invoice.findMany.mockReset();
     mockedPrisma.invoice.findFirst.mockReset();
@@ -185,7 +192,8 @@ describe('Invoices API', () => {
       createdAt: new Date('2026-02-20T10:00:00.000Z'),
       updatedAt: new Date('2026-02-20T10:00:00.000Z'),
     });
-    txInvoiceUpdate.mockResolvedValue({
+    txInvoiceUpdateMany.mockResolvedValue({ count: 1 });
+    txInvoiceFindUnique.mockResolvedValue({
       id: 'invoice-1',
       invoiceNumber: 'INV-202602-001',
       invoiceYear: 2026,
@@ -220,6 +228,6 @@ describe('Invoices API', () => {
 
     expect(response.status).toBe(201);
     expect(response.body.invoice.status).toBe('PARTIALLY_PAID');
-    expect(mockedPrisma.auditLog.create).toHaveBeenCalledTimes(2);
+    expect(txAuditLogCreate).toHaveBeenCalledTimes(2);
   });
 });

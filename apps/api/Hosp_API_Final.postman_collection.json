@@ -181,7 +181,7 @@
         },
         {
           "name": "MFA Backup Codes",
-          "request": { "method": "GET", "url": "{{base_url}}/api/auth/mfa/backup-codes" }
+          "request": { "method": "POST", "url": "{{base_url}}/api/auth/mfa/backup-codes" }
         },
         {
           "name": "Export My Data",

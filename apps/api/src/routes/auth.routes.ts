@@ -3,7 +3,7 @@ import { Router, type CookieOptions, type Request, type Response } from 'express
 import bcrypt from 'bcrypt';
 import jwt, { type JwtPayload, type SignOptions } from 'jsonwebtoken';
 import qrcode from 'qrcode';
-import speakeasy from 'speakeasy';
+import * as OTPAuth from 'otpauth';
 import { LoginRequestDto, RegisterRequestDto } from '../dto/auth.dto.js';
 import { AppError } from '../errors/AppError.js';
 import { AuthError, NotFoundError, ValidationError } from '../errors/customErrors.js';
@@ -321,12 +321,14 @@ const getDecryptedMfaSecret = (encryptedSecret: string | null): string => {
 
 const verifyTotpCode = (encryptedSecret: string | null, code: string): boolean => {
   const secret = getDecryptedMfaSecret(encryptedSecret);
-  return speakeasy.totp.verify({
-    secret,
-    encoding: 'base32',
-    token: normalizeTotpCode(code),
-    window: 1,
+  const totp = new OTPAuth.TOTP({
+    secret: OTPAuth.Secret.fromBase32(secret),
+    algorithm: 'SHA1',
+    digits: 6,
+    period: 30,
   });
+  const delta = totp.validate({ token: normalizeTotpCode(code), window: 1 });
+  return delta !== null;
 };
 
 const consumeBackupCode = async (userId: string, encryptedBackupCodes: string | null, inputCode: string): Promise<boolean> => {
@@ -421,11 +423,7 @@ router.post(
     res.status(201).json({
       success: true,
       message: 'Registration successful',
-      accessToken,
-      refreshToken,
       data: {
-        accessToken,
-        refreshToken,
         user: {
           id: user.id,
           email: user.email,
@@ -504,11 +502,7 @@ router.post(
     res.status(200).json({
       success: true,
       message: 'Login successful',
-      accessToken,
-      refreshToken,
       data: {
-        accessToken,
-        refreshToken,
         user: {
           id: user.id,
           email: user.email,
@@ -536,32 +530,38 @@ router.post(
       throw new NotFoundError('User not found');
     }
 
-    const secret = speakeasy.generateSecret({
-      length: 20,
-      name: user.email,
+    const otpSecret = new OTPAuth.Secret({ size: 20 });
+    const totp = new OTPAuth.TOTP({
       issuer: 'Hosp',
+      label: user.email,
+      algorithm: 'SHA1',
+      digits: 6,
+      period: 30,
+      secret: otpSecret,
     });
+    const base32 = otpSecret.base32;
+    const otpauth_url = totp.toString();
 
-    if (!secret.base32 || !secret.otpauth_url) {
+    if (!base32 || !otpauth_url) {
       throw new AppError('Failed to generate MFA secret', 500);
     }
 
     await prisma.user.update({
       where: { id: user.id },
       data: {
-        mfaSecret: encryptText(secret.base32),
+        mfaSecret: encryptText(base32),
         mfaEnabled: false,
         backupCodes: null,
       },
     });
 
-    const qrCodeDataUrl = await qrcode.toDataURL(secret.otpauth_url);
+    const qrCodeDataUrl = await qrcode.toDataURL(otpauth_url);
 
     res.status(200).json({
       success: true,
       message: 'MFA setup initialized',
-      secret: secret.base32,
-      otpauthUrl: secret.otpauth_url,
+      secret: base32,
+      otpauthUrl: otpauth_url,
       qrCodeDataUrl,
     });
   })
@@ -658,7 +658,7 @@ router.post(
   })
 );
 
-router.get(
+router.post(
   '/mfa/backup-codes',
   authenticate,
   asyncHandler(async (req, res) => {
@@ -807,12 +807,7 @@ const refreshTokenHandler = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     message: 'Token refreshed successfully',
-    accessToken,
-    refreshToken: rotated.token,
-    data: {
-      accessToken,
-      refreshToken: rotated.token,
-    },
+    data: {},
   });
 });
 

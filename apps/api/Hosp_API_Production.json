@@ -239,12 +239,12 @@
 			"type": "string"
 		},
 		{
-			"key": "token",
+			"key": "access_token",
 			"value": "",
 			"type": "string"
 		},
 		{
-			"key": "refreshToken",
+			"key": "refresh_token",
 			"value": "",
 			"type": "string"
 		}

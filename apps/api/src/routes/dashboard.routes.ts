@@ -75,63 +75,44 @@ type TrendPoint = {
 const buildAppointmentTrend = async (hospitalId: string, days: number): Promise<TrendPoint[]> => {
   const today = startOfUtcDay(nowUtc());
   const start = addUtcDays(today, -(days - 1));
-  const trend: TrendPoint[] = [];
 
-  for (let offset = 0; offset < days; offset += 1) {
-    const currentDay = addUtcDays(start, offset);
-    const dayStart = startOfUtcDay(currentDay);
-    const dayEnd = endOfUtcDay(currentDay);
-
-    const count = await prisma.appointment.count({
-      where: {
-        hospitalId,
-        status: { not: AppointmentStatus.CANCELLED },
-        scheduledAt: {
-          gte: dayStart,
-          lte: dayEnd,
+  return Promise.all(
+    Array.from({ length: days }, async (_, offset) => {
+      const dayStart = startOfUtcDay(addUtcDays(start, offset));
+      const dayEnd = endOfUtcDay(dayStart);
+      const count = await prisma.appointment.count({
+        where: {
+          hospitalId,
+          status: { not: AppointmentStatus.CANCELLED },
+          scheduledAt: { gte: dayStart, lte: dayEnd },
         },
-      },
-    });
-
-    trend.push({
-      date: dayStart.toISOString().slice(0, 10),
-      count,
-    });
-  }
-
-  return trend;
+      });
+      return { date: dayStart.toISOString().slice(0, 10), count };
+    })
+  );
 };
 
 const buildRevenueTrend = async (hospitalId: string, days: number): Promise<TrendPoint[]> => {
   const today = startOfUtcDay(nowUtc());
   const start = addUtcDays(today, -(days - 1));
-  const trend: TrendPoint[] = [];
 
-  for (let offset = 0; offset < days; offset += 1) {
-    const currentDay = addUtcDays(start, offset);
-    const dayStart = startOfUtcDay(currentDay);
-    const dayEnd = endOfUtcDay(currentDay);
-
-    const aggregate = await prisma.payment.aggregate({
-      _sum: {
-        amount: true,
-      },
-      where: {
-        hospitalId,
-        receivedAt: {
-          gte: dayStart,
-          lte: dayEnd,
+  return Promise.all(
+    Array.from({ length: days }, async (_, offset) => {
+      const dayStart = startOfUtcDay(addUtcDays(start, offset));
+      const dayEnd = endOfUtcDay(dayStart);
+      const aggregate = await prisma.payment.aggregate({
+        _sum: { amount: true },
+        where: {
+          hospitalId,
+          receivedAt: { gte: dayStart, lte: dayEnd },
         },
-      },
-    });
-
-    trend.push({
-      date: dayStart.toISOString().slice(0, 10),
-      revenue: Number(toNumber(aggregate._sum.amount).toFixed(2)),
-    });
-  }
-
-  return trend;
+      });
+      return {
+        date: dayStart.toISOString().slice(0, 10),
+        revenue: Number(toNumber(aggregate._sum.amount).toFixed(2)),
+      };
+    })
+  );
 };
 
 router.get(

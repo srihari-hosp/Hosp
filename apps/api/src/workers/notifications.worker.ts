@@ -1,6 +1,6 @@
 import { Worker } from 'bullmq';
 import { logger } from '../logger/index.js';
-import { bullmqConnection } from '../queue/connection.js';
+import { bullmqConnection, bullmqPrefix } from '../queue/connection.js';
 import { QUEUE_NAMES, type NotificationJobData } from '../queue/types.js';
 
 export const createNotificationsWorker = (): Worker<NotificationJobData> => {
@@ -22,6 +22,7 @@ export const createNotificationsWorker = (): Worker<NotificationJobData> => {
     },
     {
       connection: bullmqConnection,
+      prefix: bullmqPrefix,
       concurrency,
     }
   );

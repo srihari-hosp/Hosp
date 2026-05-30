@@ -296,7 +296,7 @@
         {
           "name": "Get Backup Codes",
           "request": {
-            "method": "GET",
+            "method": "POST",
             "header": [
               {
                 "key": "Content-Type",

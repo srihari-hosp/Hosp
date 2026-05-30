@@ -16,5 +16,6 @@ export const bullmqConnection: RedisOptions = {
   tls: parsedRedisUrl.protocol === 'rediss:' ? {} : undefined,
   maxRetriesPerRequest: null,
   enableReadyCheck: false,
-  keyPrefix: process.env.NODE_ENV === 'production' ? 'hosp:prod:' : 'hosp:dev:',
 };
+
+export const bullmqPrefix = process.env.NODE_ENV === 'production' ? 'hosp:prod' : 'hosp:dev';

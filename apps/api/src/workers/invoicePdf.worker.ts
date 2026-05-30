@@ -1,6 +1,6 @@
 import { Worker } from 'bullmq';
 import { logger } from '../logger/index.js';
-import { bullmqConnection } from '../queue/connection.js';
+import { bullmqConnection, bullmqPrefix } from '../queue/connection.js';
 import { dataArchivalQueue, notificationsQueue } from '../queue/queues.js';
 import { QUEUE_NAMES, type InvoicePdfJobData, type InvoicePdfJobResult } from '../queue/types.js';
 import { prisma } from '../prisma/client.js';
@@ -57,6 +57,7 @@ export const createInvoicePdfWorker = (): Worker<InvoicePdfJobData, InvoicePdfJo
     },
     {
       connection: bullmqConnection,
+      prefix: bullmqPrefix,
       concurrency: Math.max(1, parseInt(process.env.PDF_WORKER_CONCURRENCY ?? '2', 10) || 2),
     }
   );

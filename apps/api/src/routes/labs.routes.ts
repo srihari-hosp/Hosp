@@ -497,31 +497,28 @@ router.post(
     const { hospitalId, userId } = getHospitalAndUser(req as AuthenticatedRequest);
     const body = req.body as CreateLabTestRequestDto;
 
-    const existing = await labPrisma.labTest.findFirst({
-      where: {
-        hospitalId,
-        code: body.code.trim().toUpperCase(),
-      },
-      select: { id: true },
-    });
-    if (existing) {
-      throw new ValidationError('Lab test with this code already exists');
+    let created;
+    try {
+      created = await labPrisma.labTest.create({
+        data: {
+          hospitalId,
+          code: body.code.trim().toUpperCase(),
+          name: body.name.trim(),
+          category: body.category?.trim() || null,
+          sampleType: body.sampleType?.trim() || null,
+          defaultUnit: body.defaultUnit?.trim() || null,
+          referenceRange: body.referenceRange?.trim() || null,
+          instructions: body.instructions?.trim() || body.description?.trim() || null,
+          isActive: true,
+        },
+        select: labTestSelect,
+      });
+    } catch (error) {
+      if (error && typeof error === 'object' && (error as { code?: string }).code === 'P2002') {
+        throw new ValidationError('Lab test with this code already exists');
+      }
+      throw error;
     }
-
-    const created = await labPrisma.labTest.create({
-      data: {
-        hospitalId,
-        code: body.code.trim().toUpperCase(),
-        name: body.name.trim(),
-        category: body.category?.trim() || null,
-        sampleType: body.sampleType?.trim() || null,
-        defaultUnit: body.defaultUnit?.trim() || null,
-        referenceRange: body.referenceRange?.trim() || null,
-        instructions: body.instructions?.trim() || body.description?.trim() || null,
-        isActive: true,
-      },
-      select: labTestSelect,
-    });
 
     await logAudit({
       req: req as AuthenticatedRequest,

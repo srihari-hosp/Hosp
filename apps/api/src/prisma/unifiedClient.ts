@@ -214,7 +214,11 @@ export const createUnifiedPrismaClient = (): PrismaClient => {
           }
 
           // 2. Pre-Query RLS Enforcements (Tenant Isolation)
-          if (normalizedModel && hospitalId && isRlsModel(normalizedModel)) {
+          if (normalizedModel && isRlsModel(normalizedModel)) {
+            if (!hospitalId) {
+              throw new Error(`Missing tenant context for ${model}.${operation}`);
+            }
+
             if (['create', 'update'].includes(operation)) {
               enforceTenantInData(mutableArgs.data, normalizedModel, hospitalId, operation === 'update');
             } else if (operation === 'createMany') {

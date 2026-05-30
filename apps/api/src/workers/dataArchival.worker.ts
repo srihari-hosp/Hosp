@@ -1,6 +1,6 @@
 import { Worker } from 'bullmq';
 import { logger } from '../logger/index.js';
-import { bullmqConnection } from '../queue/connection.js';
+import { bullmqConnection, bullmqPrefix } from '../queue/connection.js';
 import { QUEUE_NAMES, type DataArchivalJobData } from '../queue/types.js';
 
 export const createDataArchivalWorker = (): Worker<DataArchivalJobData> => {
@@ -17,6 +17,7 @@ export const createDataArchivalWorker = (): Worker<DataArchivalJobData> => {
     },
     {
       connection: bullmqConnection,
+      prefix: bullmqPrefix,
       concurrency: Number(process.env.DATA_ARCHIVAL_WORKER_CONCURRENCY ?? 2),
     }
   );

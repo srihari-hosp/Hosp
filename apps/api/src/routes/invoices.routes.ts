@@ -342,6 +342,7 @@ const logInvoiceAudit = async ({
   operation,
   before,
   after,
+  tx,
 }: {
   req: AuthenticatedRequest;
   hospitalId: string;
@@ -351,10 +352,12 @@ const logInvoiceAudit = async ({
   operation: string;
   before: unknown;
   after: unknown;
+  tx?: Prisma.TransactionClient;
 }): Promise<void> => {
   const context = getRequestContext();
+  const db = tx ?? prisma;
 
-  await prisma.auditLog.create({
+  await db.auditLog.create({
     data: {
       hospitalId,
       userId,
@@ -620,6 +623,25 @@ router.post(
         throw new ValidationError('Payment amount exceeds outstanding balance');
       }
 
+      const updatedAmountPaid = decimalRound(existingInvoice.amountPaid.plus(paymentAmount));
+      const updatedStatus = computeInvoiceStatus(updatedAmountPaid, existingInvoice.total);
+
+      const updateResult = await tx.invoice.updateMany({
+        where: {
+          id,
+          hospitalId,
+          amountPaid: { lte: decimalRound(existingInvoice.total.minus(paymentAmount)) },
+        },
+        data: {
+          amountPaid: { increment: paymentAmount },
+          status: updatedStatus,
+        },
+      });
+
+      if (updateResult.count === 0) {
+        throw new ValidationError('Payment would overpay outstanding balance due to concurrent updates');
+      }
+
       const payment = await tx.payment.create({
         data: {
           hospitalId,
@@ -642,53 +664,51 @@ router.post(
         },
       });
 
-      const updatedAmountPaid = decimalRound(existingInvoice.amountPaid.plus(paymentAmount));
-      const updatedStatus = computeInvoiceStatus(updatedAmountPaid, existingInvoice.total);
-
-      const invoice = await tx.invoice.update({
+      const invoice = await tx.invoice.findUnique({
         where: { id },
-        data: {
-          amountPaid: updatedAmountPaid,
-          status: updatedStatus,
-        },
         select: invoiceSelect,
       });
+
+      if (!invoice) {
+        throw new NotFoundError('Invoice not found');
+      }
+
+      await Promise.all([
+        logInvoiceAudit({
+          req: req as AuthenticatedRequest,
+          hospitalId,
+          userId,
+          entityType: 'Payment',
+          entityId: payment.id,
+          operation: 'record_payment',
+          before: null,
+          after: payment,
+          tx,
+        }),
+        logInvoiceAudit({
+          req: req as AuthenticatedRequest,
+          hospitalId,
+          userId,
+          entityType: 'Invoice',
+          entityId: invoice.id,
+          operation: 'payment_status_update',
+          before: {
+            amountPaid: existingInvoice.amountPaid,
+            status: existingInvoice.status,
+          },
+          after: {
+            amountPaid: invoice.amountPaid,
+            status: invoice.status,
+          },
+          tx,
+        }),
+      ]);
 
       return {
         payment,
         invoice,
-        beforeInvoice: existingInvoice,
       };
     });
-
-    await Promise.all([
-      logInvoiceAudit({
-        req: req as AuthenticatedRequest,
-        hospitalId,
-        userId,
-        entityType: 'Payment',
-        entityId: result.payment.id,
-        operation: 'record_payment',
-        before: null,
-        after: result.payment,
-      }),
-      logInvoiceAudit({
-        req: req as AuthenticatedRequest,
-        hospitalId,
-        userId,
-        entityType: 'Invoice',
-        entityId: result.invoice.id,
-        operation: 'payment_status_update',
-        before: {
-          amountPaid: result.beforeInvoice.amountPaid,
-          status: result.beforeInvoice.status,
-        },
-        after: {
-          amountPaid: result.invoice.amountPaid,
-          status: result.invoice.status,
-        },
-      }),
-    ]);
 
     res.status(201).json({
       success: true,

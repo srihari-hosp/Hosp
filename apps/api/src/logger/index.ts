@@ -23,9 +23,16 @@ const secretKeys = new Set([
   'refreshtoken',
 ]);
 
-const redactSecrets = (value: unknown): unknown => {
+const redactSecrets = (value: unknown, seen = new WeakSet<object>()): unknown => {
+  if (value && typeof value === 'object') {
+    if (seen.has(value)) {
+      return '[Circular]';
+    }
+    seen.add(value);
+  }
+
   if (Array.isArray(value)) {
-    return value.map((entry) => redactSecrets(entry));
+    return value.map((entry) => redactSecrets(entry, seen));
   }
 
   if (value && typeof value === 'object') {
@@ -34,7 +41,7 @@ const redactSecrets = (value: unknown): unknown => {
       if (secretKeys.has(key.toLowerCase())) {
         acc[key] = '[REDACTED]';
       } else {
-        acc[key] = redactSecrets(entry);
+        acc[key] = redactSecrets(entry, seen);
       }
       return acc;
     }, {});

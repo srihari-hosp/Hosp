@@ -639,6 +639,7 @@ export class PdfService {
 
     try {
       await fs.writeFile(tempPath, Buffer.from(pdfBytes));
+      await fs.rename(tempPath, absolutePath);
 
       const normalizedRelativePath = relativePath.replace(/\\/g, '/');
       const pdfUrl = `${getPublicBaseUrl()}/uploads/${normalizedRelativePath}`;
@@ -656,8 +657,6 @@ export class PdfService {
         },
       });
 
-      await fs.rename(tempPath, absolutePath);
-
       return {
         pdfPath: normalizedRelativePath,
         pdfUrl,
@@ -665,6 +664,7 @@ export class PdfService {
       };
     } catch (error) {
       await fs.unlink(tempPath).catch(() => {});
+      await fs.unlink(absolutePath).catch(() => {});
       throw error;
     }
   }
@@ -771,6 +771,7 @@ export class PdfService {
 
     try {
       await fs.writeFile(tempPath, Buffer.from(pdfBytes));
+      await fs.rename(tempPath, absolutePath);
 
       const normalizedRelativePath = relativePath.replace(/\\/g, '/');
       const pdfUrl = `${getPublicBaseUrl()}/uploads/${normalizedRelativePath}`;
@@ -786,8 +787,6 @@ export class PdfService {
         WHERE "id" = ${invoice.id}
       `;
 
-      await fs.rename(tempPath, absolutePath);
-
       return {
         pdfPath: normalizedRelativePath,
         pdfUrl,
@@ -795,6 +794,7 @@ export class PdfService {
       };
     } catch (error) {
       await fs.unlink(tempPath).catch(() => {});
+      await fs.unlink(absolutePath).catch(() => {});
       throw error;
     }
   }

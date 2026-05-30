@@ -64,9 +64,17 @@ export const LabResultEntryForm = ({ order, isSubmitting = false, onSubmit }: La
     );
   }
 
-  const submitDraft = async () => {
+  const submitWithGuard = async (payload: LabResultSubmitPayload) => {
     setFormError(null);
-    await onSubmit({
+    try {
+      await onSubmit(payload);
+    } catch {
+      setFormError("Unable to submit lab result. Please try again.");
+    }
+  };
+
+  const submitDraft = async () => {
+    await submitWithGuard({
       resultValue: resultValue.trim() || undefined,
       unit: unit.trim() || undefined,
       referenceRange: referenceRange.trim() || undefined,
@@ -83,9 +91,8 @@ export const LabResultEntryForm = ({ order, isSubmitting = false, onSubmit }: La
       setFormError("Result value is required to finalize the report.");
       return;
     }
-    setFormError(null);
     const nowIso = new Date().toISOString();
-    await onSubmit({
+    await submitWithGuard({
       resultValue: resultValue.trim(),
       unit: unit.trim() || undefined,
       referenceRange: referenceRange.trim() || undefined,
@@ -98,8 +105,7 @@ export const LabResultEntryForm = ({ order, isSubmitting = false, onSubmit }: La
   };
 
   const markSampleCollected = async () => {
-    setFormError(null);
-    await onSubmit({
+    await submitWithGuard({
       collectedAt: new Date().toISOString(),
       status: order.result?.status === "FINAL" ? "FINAL" : "DRAFT",
     });

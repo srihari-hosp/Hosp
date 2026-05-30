@@ -207,7 +207,7 @@ export const RegisterPage = () => {
                     required
                     size="medium"
                     value={formData.email}
-                    error={isSubmitted && !isValidEmail(formData.email)}
+                    error={isSubmitted && !isValidEmail(formData.email.trim())}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     InputProps={{
                       startAdornment: (

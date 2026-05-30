@@ -62,17 +62,6 @@ export const DepartmentsPage: FC = () => {
                   borderRadius: "24px", 
                   bgcolor: "white", 
                   border: `1px solid ${tokens.colors.outlineVariant}`, 
-                  transition: "all 0.3s ease", 
-                  cursor: "pointer", 
-                  "&:hover": { 
-                    borderColor: tokens.colors.primary, 
-                    boxShadow: "0 10px 20px rgba(0, 0, 0, 0.05)",
-                    transform: "translateY(-4px)"
-                  }, 
-                  "&:hover .icon-box": { 
-                    bgcolor: tokens.colors.primary, 
-                    color: "white" 
-                  } 
                 }}>
                   <Box className="icon-box" sx={{ 
                     width: 56, 

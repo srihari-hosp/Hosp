@@ -123,6 +123,7 @@ export const MedicineListPage = () => {
   const [dispenseOpen, setDispenseOpen] = useState(false);
   const [activeMedicineId, setActiveMedicineId] = useState<string | null>(null);
   const [errorText, setErrorText] = useState<string | null>(null);
+  const [batchRefreshKey, setBatchRefreshKey] = useState(0);
 
   const debouncedSearch = useDebounce(search, 250);
   const {
@@ -172,7 +173,7 @@ export const MedicineListPage = () => {
     };
     void loadBatches();
     return () => { isCurrent = false; };
-  }, [getMedicineBatches, medicines]);
+  }, [batchRefreshKey, getMedicineBatches, medicines]);
 
   const summaries = useMemo(
     () => medicines.map((medicine) => summarizeMedicineStock(medicine, batchesByMedicine[medicine.id] ?? [])),
@@ -425,6 +426,7 @@ export const MedicineListPage = () => {
         onClose={() => setDispenseOpen(false)}
         onDispensed={() => {
           setErrorText(null);
+          setBatchRefreshKey((prev) => prev + 1);
           void refetch();
         }}
       />

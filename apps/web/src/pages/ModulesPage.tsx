@@ -106,7 +106,14 @@ export const ModulesPage: FC = () => {
                 Self-service appointments, digital prescriptions, and instant lab results access for patients, reducing clinic overhead.
               </Typography>
               <Stack direction="row" spacing={2} sx={{ mt: 3 }}>
-                <Button variant="outlined" sx={{ borderRadius: '12px', textTransform: 'none', fontWeight: 700, px: 3 }}>Learn More</Button>
+                <Button
+                  variant="outlined"
+                  component={RouterLink}
+                  to="/help-center"
+                  sx={{ borderRadius: "12px", textTransform: "none", fontWeight: 700, px: 3 }}
+                >
+                  Learn More
+                </Button>
               </Stack>
             </Box>
           </Paper>

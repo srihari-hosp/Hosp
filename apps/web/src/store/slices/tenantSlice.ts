@@ -4,6 +4,7 @@ export type Tenant = {
   id: string;
   name: string;
   code?: string;
+  address?: string;
 };
 
 export type TenantState = {

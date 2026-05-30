@@ -1,6 +1,12 @@
 import { test, expect } from '@playwright/test';
 
 const WEB_URL = process.env.WEB_URL || 'https://hosp-web-two.vercel.app';
+const TEST_EMAIL = process.env.TEST_EMAIL;
+const TEST_PASSWORD = process.env.TEST_PASSWORD;
+
+if (!TEST_EMAIL || !TEST_PASSWORD) {
+  throw new Error("TEST_EMAIL and TEST_PASSWORD environment variables are required.");
+}
 
 test('frontend smoke: deployed app loads', async ({ page }) => {
   await page.goto(WEB_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
@@ -23,8 +29,8 @@ test('frontend smoke: sign in page opens', async ({ page }) => {
 test('frontend smoke: login works', async ({ page }) => {
   await page.goto(`${WEB_URL}/login`, { waitUntil: 'domcontentloaded', timeout: 60000 });
 
-  await page.getByLabel(/email/i).fill('admin@hospital.com');
-  await page.getByLabel(/password/i).fill('Admin@123');
+  await page.getByLabel(/email/i).fill(TEST_EMAIL);
+  await page.getByLabel(/password/i).fill(TEST_PASSWORD);
 
   await page.getByRole('button', { name: /sign in|login/i }).click();
 
@@ -35,8 +41,8 @@ test('frontend smoke: login works', async ({ page }) => {
 test('frontend smoke: login and dashboard navigation', async ({ page }) => {
   await page.goto(`${WEB_URL}/login`, { waitUntil: 'domcontentloaded', timeout: 60000 });
 
-  await page.getByLabel(/email/i).fill('admin@hospital.com');
-  await page.getByLabel(/password/i).fill('Admin@123');
+  await page.getByLabel(/email/i).fill(TEST_EMAIL);
+  await page.getByLabel(/password/i).fill(TEST_PASSWORD);
   await page.getByRole('button', { name: /sign in|login/i }).click();
 
   await expect(page.locator('body')).toContainText(/dashboard|patients|appointments/i, {

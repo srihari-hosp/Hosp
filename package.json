@@ -16,9 +16,9 @@
     "type-check": "turbo run type-check",
     "test": "turbo run test",
     "build": "turbo run build",
-    "security:api": "npm run --workspace apps/api security:full",
+    "security:api": "npm run --workspace @hosp/api security:full",
     "security:zap-baseline": "powershell -ExecutionPolicy Bypass -File scripts/security/run-zap-baseline.ps1",
-    "perf:latency": "npm run --workspace apps/api perf:latency"
+    "perf:latency": "npm run --workspace @hosp/api perf:latency"
   },
   "devDependencies": {
     "@playwright/test": "^1.59.1",

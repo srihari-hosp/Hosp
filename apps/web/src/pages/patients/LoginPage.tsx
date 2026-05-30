@@ -122,7 +122,7 @@ export const LoginPage = () => {
             }
           : {}),
       }).unwrap();
-      dispatch(loginSuccess({ token: result.data?.accessToken }));
+      dispatch(loginSuccess({ token: result.accessToken }));
       navigate('/dashboard', { replace: true });
     } catch (error) {
       if (isFetchLikeError(error) && error.status === 'FETCH_ERROR') {

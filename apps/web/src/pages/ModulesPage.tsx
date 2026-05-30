@@ -92,7 +92,7 @@ export const ModulesPage: FC = () => {
             </Box>
             <Typography variant="h5" sx={{ color: tokens.colors.onSurface, fontWeight: 800 }}>Modern Tech Stack</Typography>
             <Typography sx={{ color: tokens.colors.onSurfaceVariant, mt: 1.5, lineHeight: 1.6, fontWeight: 500 }}>
-              Built with React, Node.js, and PostgreSQL for lighting fast response times and deep audit trails.
+              Built with React, Node.js, and PostgreSQL for lightning fast response times and deep audit trails.
             </Typography>
           </Paper>
 

@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, ReactNode } from "react";
 import {
   Box,
   Container,
@@ -21,7 +21,7 @@ import { Link as RouterLink } from "react-router-dom";
 import { tokens, glassmorphism } from "../theme/tokens";
 import { PublicLayout } from "../components/layout/PublicLayout";
 
-const CourseCard = ({ title, level, duration, progress, icon }: { title: string, level: string, duration: string, progress: number, icon: React.ReactNode }) => (
+const CourseCard = ({ title, level, duration, progress, icon }: { title: string, level: string, duration: string, progress: number, icon: ReactNode }) => (
   <Paper
     elevation={0}
     sx={{

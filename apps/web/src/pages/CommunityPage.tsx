@@ -78,6 +78,10 @@ export const CommunityPage: FC = () => {
               <Typography sx={{ color: tokens.colors.onSurfaceVariant, mb: 3 }}>Join our Slack community to discuss features and integrations.</Typography>
               <Button 
                 variant="contained" 
+                component="a"
+                href="https://slack.com"
+                target="_blank"
+                rel="noopener noreferrer"
                 sx={{ 
                   bgcolor: tokens.colors.primary, 
                   color: "white", 

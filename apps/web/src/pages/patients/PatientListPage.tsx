@@ -102,10 +102,11 @@ export const PatientListPage: React.FC = () => {
   const [createPatient, { isLoading: isCreating }] = useCreatePatientMutation();
 
   const validation = useMemo(() => {
-    const ageNum = Number(form.age);
+    const trimmedAge = form.age.trim();
+    const ageNum = Number(trimmedAge);
     return {
       name: form.name.trim().length >= 2,
-      age: Number.isFinite(ageNum) && ageNum >= 0,
+      age: trimmedAge !== '' && Number.isInteger(ageNum) && ageNum > 0 && ageNum <= 150,
       gender: !!form.gender,
       mobile: isValidIndianMobile(form.mobile.trim()),
       aadhaar: isValidAadhaar(form.aadhaar.trim()),
@@ -119,6 +120,8 @@ export const PatientListPage: React.FC = () => {
     event.preventDefault();
     setFormSubmitted(true);
     if (!isFormValid) return;
+    setSuccessMessage(null);
+    setSubmitError(null);
 
     try {
       const result = await createPatient({

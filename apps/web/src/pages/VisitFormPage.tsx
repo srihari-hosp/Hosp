@@ -202,15 +202,16 @@ export const VisitFormPage = () => {
     setPrescriptionDirty(true);
   };
 
-  const openClientGeneratedPdf = async () => {
+  const openClientGeneratedPdf = async (pdfWindow?: Window | null) => {
     if (!appointment) {
+      if (pdfWindow) pdfWindow.close();
       return;
     }
 
     const doc = (
       <PrescriptionPDF
         hospitalName={tenant?.name ?? "Hospital"}
-        hospitalAddress="Hospital Address"
+        hospitalAddress={tenant?.address ?? ""}
         patientName={appointment.patient.name}
         patientMrn={appointment.patient.mrn}
         doctorName={appointment.doctor.name}
@@ -224,7 +225,11 @@ export const VisitFormPage = () => {
 
     const blob = await pdf(doc).toBlob();
     const blobUrl = URL.createObjectURL(blob);
-    window.open(blobUrl, "_blank", "noopener,noreferrer");
+    if (pdfWindow) {
+      pdfWindow.location.href = blobUrl;
+    } else {
+      window.open(blobUrl, "_blank", "noopener,noreferrer");
+    }
   };
 
   const waitForQueuedPdf = async (jobId: string): Promise<string | null> => {
@@ -259,14 +264,20 @@ export const VisitFormPage = () => {
       return;
     }
 
-    if (!prescriptionDirty && lastPdfUrl) {
-      window.open(lastPdfUrl, "_blank", "noopener,noreferrer");
-      return;
-    }
-
     const medicationValidationError = validateMedications(medicationRows);
     if (medicationValidationError) {
       setErrorText(medicationValidationError);
+      return;
+    }
+
+    const pdfWindow = window.open("about:blank", "_blank", "noopener,noreferrer");
+
+    if (!prescriptionDirty) {
+      if (lastPdfUrl) {
+        if (pdfWindow) pdfWindow.location.href = lastPdfUrl;
+      } else {
+        await openClientGeneratedPdf(pdfWindow);
+      }
       return;
     }
 
@@ -292,13 +303,16 @@ export const VisitFormPage = () => {
         setLastPdfUrl(generatedPdfUrl);
         setPrescriptionDirty(false);
         setSuccessText("Prescription PDF generated.");
-        window.open(generatedPdfUrl, "_blank", "noopener,noreferrer");
+        if (pdfWindow) {
+          pdfWindow.location.href = generatedPdfUrl;
+        }
         return;
       }
 
       setSuccessText("PDF queue timed out. Opened client-generated PDF.");
-      await openClientGeneratedPdf();
+      await openClientGeneratedPdf(pdfWindow);
     } catch (error) {
+      if (pdfWindow) pdfWindow.close();
       setErrorText(parseApiError(error));
     } finally {
       setIsPrinting(false);

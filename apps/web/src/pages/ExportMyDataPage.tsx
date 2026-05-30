@@ -94,14 +94,17 @@ export const ExportMyDataPage = () => {
                   {isLoading || isFetching ? "Preparing secure package..." : "Generate & Download JSON Export"}
                 </Button>
 
-                {data && (
-                  <Stack direction="row" spacing={1.5} alignItems="center" justifyContent="center">
-                    <History sx={{ fontSize: 16, color: tokens.colors.onSurfaceVariant, opacity: 0.5 }} />
-                    <Typography sx={{ color: tokens.colors.onSurfaceVariant, fontWeight: 700, fontSize: '0.75rem', opacity: 0.7 }}>
-                      LAST EXPORTED: {new Date(data.exportedAt).toLocaleString(undefined, { dateStyle: "long", timeStyle: "short" })}
-                    </Typography>
-                  </Stack>
-                )}
+                {data?.exportedAt && (() => {
+                  const d = new Date(data.exportedAt);
+                  return isNaN(d.getTime()) ? null : (
+                    <Stack direction="row" spacing={1.5} alignItems="center" justifyContent="center">
+                      <History sx={{ fontSize: 16, color: tokens.colors.onSurfaceVariant, opacity: 0.5 }} />
+                      <Typography sx={{ color: tokens.colors.onSurfaceVariant, fontWeight: 700, fontSize: '0.75rem', opacity: 0.7 }}>
+                        LAST EXPORTED: {d.toLocaleString(undefined, { dateStyle: "long", timeStyle: "short" })}
+                      </Typography>
+                    </Stack>
+                  );
+                })()}
               </Stack>
             </Paper>
           </Grid>

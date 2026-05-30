@@ -100,7 +100,7 @@ const Footer = () => (
       </Grid>
       <Box sx={{ mt: 4, pt: 3, borderTop: `1px solid ${tokens.colors.outlineVariant}`, display: "flex", flexDirection: { xs: "column", md: "row" }, justifyContent: "space-between", alignItems: "center", gap: 2 }}>
         <Typography sx={{ ...tokens.typography.bodySm, color: tokens.colors.onSurfaceVariant, opacity: 0.7 }}>
-          © 2024 HMS Medical Center. All rights reserved.
+          © {new Date().getFullYear()} HMS Medical Center. All rights reserved.
         </Typography>
         <Stack direction="row" spacing={3}>
           <Typography component={RouterLink} to="/privacy" sx={{ ...tokens.typography.bodySm, color: tokens.colors.onSurfaceVariant, textDecoration: "none", opacity: 0.7, "&:hover": { color: tokens.colors.primary, opacity: 1 } }}>

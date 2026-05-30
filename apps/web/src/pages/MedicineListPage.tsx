@@ -143,18 +143,31 @@ export const MedicineListPage = () => {
     }
     let isCurrent = true;
     const loadBatches = async () => {
-      try {
-        const entries = await Promise.all(
-          medicines.map(async (medicine) => {
-            const batches = await getMedicineBatches({ medicineId: medicine.id, includeExpired: true }, true).unwrap();
-            return [medicine.id, batches] as const;
-          })
-        );
-        if (!isCurrent) return;
-        setBatchesByMedicine(Object.fromEntries(entries));
-      } catch (error) {
-        if (!isCurrent) return;
-        setErrorText(parseApiError(error));
+      const results = await Promise.allSettled(
+        medicines.map(async (medicine) => {
+          const batches = await getMedicineBatches({ medicineId: medicine.id, includeExpired: true }, true).unwrap();
+          return [medicine.id, batches] as const;
+        })
+      );
+      if (!isCurrent) return;
+
+      const successfulEntries = [];
+      const errors = [];
+
+      for (const result of results) {
+        if (result.status === "fulfilled") {
+          successfulEntries.push(result.value);
+        } else {
+          errors.push(result.reason);
+        }
+      }
+
+      setBatchesByMedicine(Object.fromEntries(successfulEntries));
+
+      if (errors.length > 0) {
+        setErrorText(parseApiError(errors[0]));
+      } else {
+        setErrorText(null);
       }
     };
     void loadBatches();

@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, ReactNode } from "react";
 import {
   Box,
   Container,
@@ -15,7 +15,7 @@ import { Link as RouterLink } from "react-router-dom";
 import { tokens, glassmorphism } from "../theme/tokens";
 import { PublicLayout } from "../components/layout/PublicLayout";
 
-const Section = ({ title, children, number }: { title: string, children: React.ReactNode, number: string }) => (
+const Section = ({ title, children, number }: { title: string, children: ReactNode, number: string }) => (
   <Box sx={{ mb: 6 }}>
     <Stack direction="row" spacing={3} sx={{ mb: 2 }}>
       <Typography sx={{ 

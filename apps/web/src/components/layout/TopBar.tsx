@@ -17,6 +17,7 @@ import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { logout } from '../../store/slices/authSlice';
 import { clearUser } from '../../store/slices/userSlice';
 import { clearTenantState } from '../../store/slices/tenantSlice';
+import { clearOnboardingStorage } from '../../App';
 import {
   LocalHospital,
   Settings,
@@ -47,6 +48,7 @@ export const TopBar: React.FC = () => {
     } catch {
       // Logout is best-effort
     }
+    clearOnboardingStorage(currentUser?.id);
     dispatch(logout());
     dispatch(clearUser());
     dispatch(clearTenantState());

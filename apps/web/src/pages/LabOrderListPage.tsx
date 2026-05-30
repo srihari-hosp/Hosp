@@ -82,7 +82,7 @@ const openLabReportPdf = async (order: LabOrderRecord, hospitalName: string, hos
 export const LabOrderListPage = () => {
   const tenant = useAppSelector((state) => state.tenant.currentTenant);
   const hospitalName = tenant?.name ?? "Hospital";
-  const hospitalAddress = "Hospital Address";
+  const hospitalAddress = tenant?.address ?? "";
 
   const [statusFilter, setStatusFilter] = useState<OrderStatusFilter>("ALL");
   const [search, setSearch] = useState("");
@@ -104,17 +104,18 @@ export const LabOrderListPage = () => {
     data: labOrders = [],
     isLoading: isLoadingOrders,
     error: labOrdersError,
-  } = useGetLabOrdersQuery({
-    status: statusFilter === "ALL" ? undefined : statusFilter,
-  });
+  } = useGetLabOrdersQuery({});
 
   const [createLabOrder, { isLoading: isCreatingOrder }] = useCreateLabOrderMutation();
   const [updateLabResult, { isLoading: isUpdatingResult }] = useUpdateLabResultMutation();
 
   const filteredOrders = useMemo(() => {
     const needle = normalizeSearch(search);
-    if (!needle) return labOrders;
-    return labOrders.filter((order) => {
+    const byStatus = statusFilter === "ALL"
+      ? labOrders
+      : labOrders.filter((order) => order.status === statusFilter);
+    if (!needle) return byStatus;
+    return byStatus.filter((order) => {
       const haystack = [
         order.orderNumber,
         order.patient?.name,
@@ -125,7 +126,7 @@ export const LabOrderListPage = () => {
       ].filter(Boolean).join(" ").toLowerCase();
       return haystack.includes(needle);
     });
-  }, [labOrders, search]);
+  }, [labOrders, search, statusFilter]);
 
   const statusCounts = useMemo(() => ({
     ALL: labOrders.length,

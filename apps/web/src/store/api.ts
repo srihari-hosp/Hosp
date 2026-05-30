@@ -446,6 +446,7 @@ type AuthResponse = {
   secret?: string;
   otpauthUrl?: string;
   qrCodeDataUrl?: string;
+  accessToken?: string;
 };
 export type MyDataExport = {
   exportedAt: string;
@@ -697,7 +698,7 @@ const rawBaseQuery = fetchBaseQuery({
   baseUrl,
   credentials: "include",
   prepareHeaders: (headers, { getState }) => {
-    const token = (getState() as { auth: AuthState }).auth.token;
+    const token = (getState() as { auth: { token: string | null } }).auth.token;
     if (token) {
       headers.set("authorization", `Bearer ${token}`);
     }
@@ -735,6 +736,10 @@ const refreshAccessToken = async (
       }
 
       const newToken = refreshResult.data?.accessToken;
+      if (!newToken) {
+        api.dispatch(logout());
+        return false;
+      }
       api.dispatch(loginSuccess({ token: newToken }));
 
       return true;

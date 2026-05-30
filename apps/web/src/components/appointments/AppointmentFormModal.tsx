@@ -138,11 +138,22 @@ export const AppointmentFormModal = ({
       if (!appointmentToReschedule) {
         await createAppointment(payload).unwrap();
       } else {
-        await createAppointment(payload).unwrap();
-        await updateAppointmentStatus({
-          id: appointmentToReschedule.id,
-          status: "CANCELLED",
-        }).unwrap();
+        const newAppt = await createAppointment(payload).unwrap();
+        try {
+          await updateAppointmentStatus({
+            id: appointmentToReschedule.id,
+            status: "CANCELLED",
+          }).unwrap();
+        } catch (updateError) {
+          // Compensating action: cancel the newly created appointment
+          if (newAppt.appointment?.id) {
+            await updateAppointmentStatus({
+              id: newAppt.appointment.id,
+              status: "CANCELLED",
+            }).unwrap().catch(() => {});
+          }
+          throw updateError;
+        }
       }
       onClose();
     } catch (error) {

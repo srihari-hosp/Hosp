@@ -50,14 +50,17 @@ type OnboardingPayload = {
   role: 'ADMIN' | 'DOCTOR' | 'NURSE' | 'RECEPTIONIST';
 };
 
-const ONBOARDING_STORAGE_KEY = 'hosp_onboarding_state';
+export const ONBOARDING_STORAGE_KEY = 'hosp_onboarding_state';
 
-const readOnboardingState = (): OnboardingState => {
+export const getOnboardingKey = (userId?: string) => 
+  userId ? `${ONBOARDING_STORAGE_KEY}_${userId}` : ONBOARDING_STORAGE_KEY;
+
+export const readOnboardingState = (userId?: string): OnboardingState => {
   if (typeof window === 'undefined') {
     return { completed: false };
   }
 
-  const raw = window.localStorage.getItem(ONBOARDING_STORAGE_KEY);
+  const raw = window.localStorage.getItem(getOnboardingKey(userId));
   if (!raw) {
     return { completed: false };
   }
@@ -75,11 +78,18 @@ const readOnboardingState = (): OnboardingState => {
   }
 };
 
-const persistOnboardingState = (state: OnboardingState): void => {
+export const persistOnboardingState = (state: OnboardingState, userId?: string): void => {
   if (typeof window === 'undefined') {
     return;
   }
-  window.localStorage.setItem(ONBOARDING_STORAGE_KEY, JSON.stringify(state));
+  window.localStorage.setItem(getOnboardingKey(userId), JSON.stringify(state));
+};
+
+export const clearOnboardingStorage = (userId?: string): void => {
+  if (typeof window !== 'undefined') {
+    window.localStorage.removeItem(getOnboardingKey(userId));
+    window.localStorage.removeItem(ONBOARDING_STORAGE_KEY);
+  }
 };
 
 const AuthLoading: FC = () => (
@@ -180,6 +190,18 @@ function App() {
   const { data: meData } = useGetMeQuery(undefined, { skip: !isAuthenticated });
 
   useEffect(() => {
+    if (meData?.id) {
+      setOnboardingState(readOnboardingState(meData.id));
+    }
+  }, [meData?.id]);
+
+  const clearOnboardingState = () => {
+    const reset: OnboardingState = { completed: false };
+    setOnboardingState(reset);
+    clearOnboardingStorage(meData?.id);
+  };
+
+  useEffect(() => {
     if (authStatus !== 'idle') {
       return;
     }
@@ -196,6 +218,7 @@ function App() {
         dispatch(loginSuccess());
       })
       .catch(() => {
+        clearOnboardingState();
         dispatch(logout());
         dispatch(clearUser());
         dispatch(clearTenantState());
@@ -244,7 +267,7 @@ function App() {
       role: payload.role,
     };
     setOnboardingState(nextState);
-    persistOnboardingState(nextState);
+    persistOnboardingState(nextState, meData?.id);
 
     const tenantId = meData?.tenantId ?? currentTenant?.id ?? 'onboarding-tenant';
     dispatch(

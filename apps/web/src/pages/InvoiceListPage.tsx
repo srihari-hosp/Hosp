@@ -111,7 +111,7 @@ const normalizeSearch = (value: string): string => value.trim().toLowerCase();
 export const InvoiceListPage = () => {
   const tenant = useAppSelector((state) => state.tenant.currentTenant);
   const hospitalName = tenant?.name ?? "Hospital";
-  const hospitalAddress = "Hospital Address";
+  const hospitalAddress = tenant?.address ?? "";
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | "ALL">("ALL");
@@ -131,7 +131,6 @@ export const InvoiceListPage = () => {
     error: invoicesError,
     refetch,
   } = useGetInvoicesQuery({
-    status: statusFilter === "ALL" ? undefined : statusFilter,
     dateFrom: dateFrom || undefined,
     dateTo: dateTo || undefined,
   });
@@ -144,12 +143,13 @@ export const InvoiceListPage = () => {
 
   const filteredInvoices = useMemo(() => {
     const needle = normalizeSearch(debouncedSearch);
-    if (!needle) return invoices;
     return invoices.filter((invoice) => {
+      if (statusFilter !== "ALL" && invoice.status !== statusFilter) return false;
+      if (!needle) return true;
       const haystack = `${invoice.invoiceNumber} ${invoice.patient.name} ${invoice.patient.mrn}`.toLowerCase();
       return haystack.includes(needle);
     });
-  }, [debouncedSearch, invoices]);
+  }, [debouncedSearch, invoices, statusFilter]);
 
   const statusCounts = useMemo(() => ({
     ALL: invoices.length,
@@ -405,6 +405,7 @@ export const InvoiceListPage = () => {
                             </Button>
                             <IconButton
                               size="small"
+                              aria-label={`Download invoice ${invoice?.id ?? ''}`}
                               onClick={() => void handleGeneratePdf(invoice)}
                               disabled={isWorking}
                               sx={{ color: themeTokens.colors.primary }}

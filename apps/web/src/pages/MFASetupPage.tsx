@@ -229,7 +229,10 @@ export const MFASetupPage = () => {
                       placeholder="6-digit code"
                       size="medium"
                       value={code}
-                      onChange={e => setCode(e.target.value)}
+                      onChange={e => {
+                        setCode(e.target.value);
+                        if (isVerified) setIsVerified(false);
+                      }}
                       InputProps={{ startAdornment: <InputAdornment position="start"><LockOutlined fontSize="small" /></InputAdornment> }}
                       sx={{ flex: 1, "& .MuiOutlinedInput-root": { borderRadius: "14px" } }}
                     />

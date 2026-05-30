@@ -107,7 +107,7 @@ export const LabResultEntryForm = ({ order, isSubmitting = false, onSubmit }: La
   const markSampleCollected = async () => {
     await submitWithGuard({
       collectedAt: new Date().toISOString(),
-      status: order.result?.status === "FINAL" ? "FINAL" : "DRAFT",
+      status: (order.result?.status as "DRAFT" | "FINAL" | "CORRECTED" | undefined) ?? "DRAFT",
     });
   };
 

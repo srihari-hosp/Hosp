@@ -77,6 +77,7 @@ export const ConsentManagementPage = () => {
     setRequestError(null);
 
     try {
+      const expiryAtIso = expiryAt ? `${expiryAt}T23:59:59.999Z` : undefined;
       await grantConsent({
         patientId: selectedPatientId,
         purpose: purpose.trim(),
@@ -84,7 +85,7 @@ export const ConsentManagementPage = () => {
           .split(",")
           .map((value) => value.trim())
           .filter((value) => value.length > 0),
-        expiryAt: expiryAt ? new Date(expiryAt).toISOString() : undefined,
+        expiryAt: expiryAtIso,
       }).unwrap();
       setPurpose("");
       setDataTypesInput("");

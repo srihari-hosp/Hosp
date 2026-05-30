@@ -1108,6 +1108,31 @@ export const api = createApi({
       transformResponse: (response: BatchesResponse) => response.batches ?? [],
       providesTags: ["Pharmacy"],
     }),
+    getBatchesByMedicineIds: builder.query<Record<string, StockBatchRecord[]>, { medicineIds: string[]; includeExpired?: boolean }>({
+      async queryFn(arg, _queryApi, _extraOptions, fetchWithBQ) {
+        const results = await Promise.allSettled(
+          arg.medicineIds.map(async (id) => {
+            const result = await fetchWithBQ(`/api/pharmacy/medicines/${id}/batches${arg.includeExpired ? "?includeExpired=true" : ""}`);
+            if (result.error) throw result.error;
+            return [id, (result.data as BatchesResponse).batches ?? []] as const;
+          })
+        );
+        const successfulEntries = [];
+        const errors = [];
+        for (const result of results) {
+          if (result.status === "fulfilled") {
+            successfulEntries.push(result.value);
+          } else {
+            errors.push(result.reason);
+          }
+        }
+        if (errors.length > 0) {
+          return { error: errors[0] as FetchBaseQueryError };
+        }
+        return { data: Object.fromEntries(successfulEntries) };
+      },
+      providesTags: ["Pharmacy"],
+    }),
     dispenseMedicine: builder.mutation<
       {
         success: boolean;
@@ -1224,6 +1249,8 @@ export const {
   useGetMedicineQuery,
   useGetMedicineBatchesQuery,
   useLazyGetMedicineBatchesQuery,
+  useGetBatchesByMedicineIdsQuery,
+  useLazyGetBatchesByMedicineIdsQuery,
   useDispenseMedicineMutation,
   useGetLabTestsQuery,
   useGetLabOrdersQuery,

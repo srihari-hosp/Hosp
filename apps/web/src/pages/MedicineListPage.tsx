@@ -24,7 +24,7 @@ import { DispenseFromPrescriptionModal } from "../components/pharmacy";
 import { useDebounce } from "../hooks/useDebounce";
 import {
   useGetMedicinesQuery,
-  useLazyGetMedicineBatchesQuery,
+  useLazyGetBatchesByMedicineIdsQuery,
   type MedicineRecord,
   type StockBatchRecord,
 } from "../store/api";
@@ -135,7 +135,7 @@ export const MedicineListPage = () => {
     isActive: true,
     search: debouncedSearch.trim() || undefined,
   });
-  const [getMedicineBatches] = useLazyGetMedicineBatchesQuery();
+  const [getBatchesByMedicineIds] = useLazyGetBatchesByMedicineIdsQuery();
 
   useEffect(() => {
     if (medicines.length === 0) {
@@ -144,36 +144,22 @@ export const MedicineListPage = () => {
     }
     let isCurrent = true;
     const loadBatches = async () => {
-      const results = await Promise.allSettled(
-        medicines.map(async (medicine) => {
-          const batches = await getMedicineBatches({ medicineId: medicine.id, includeExpired: true }, true).unwrap();
-          return [medicine.id, batches] as const;
-        })
-      );
-      if (!isCurrent) return;
-
-      const successfulEntries = [];
-      const errors = [];
-
-      for (const result of results) {
-        if (result.status === "fulfilled") {
-          successfulEntries.push(result.value);
-        } else {
-          errors.push(result.reason);
-        }
-      }
-
-      setBatchesByMedicine(Object.fromEntries(successfulEntries));
-
-      if (errors.length > 0) {
-        setErrorText(parseApiError(errors[0]));
-      } else {
+      try {
+        const grouped = await getBatchesByMedicineIds({ 
+          medicineIds: medicines.map(m => m.id), 
+          includeExpired: true 
+        }, true).unwrap();
+        if (!isCurrent) return;
+        setBatchesByMedicine(grouped);
         setErrorText(null);
+      } catch (error) {
+        if (!isCurrent) return;
+        setErrorText(parseApiError(error));
       }
     };
     void loadBatches();
     return () => { isCurrent = false; };
-  }, [batchRefreshKey, getMedicineBatches, medicines]);
+  }, [batchRefreshKey, getBatchesByMedicineIds, medicines]);
 
   const summaries = useMemo(
     () => medicines.map((medicine) => summarizeMedicineStock(medicine, batchesByMedicine[medicine.id] ?? [])),

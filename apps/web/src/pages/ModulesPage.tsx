@@ -98,7 +98,7 @@ export const ModulesPage: FC = () => {
 
           <Paper elevation={0} sx={{ gridColumn: { md: "span 2" }, p: 4, borderRadius: "32px", ...glassmorphism, display: "flex", alignItems: "center", gap: 5, overflow: "hidden" }}>
             <Box sx={{ width: "35%", flexShrink: 0, display: { xs: "none", sm: "block" } }}>
-              <Box component="img" src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=400" sx={{ borderRadius: "24px", objectFit: "cover", aspectRatio: "1.4/1", width: "100%", boxShadow: '0 12px 24px rgba(0,0,0,0.08)' }} />
+              <Box component="img" alt="Clinician using the patient-centric portal" src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=400" sx={{ borderRadius: "24px", objectFit: "cover", aspectRatio: "1.4/1", width: "100%", boxShadow: '0 12px 24px rgba(0,0,0,0.08)' }} />
             </Box>
             <Box sx={{ flex: 1 }}>
               <Typography variant="h4" sx={{ color: tokens.colors.onSurface, fontWeight: 800 }}>Patient-Centric Portal</Typography>

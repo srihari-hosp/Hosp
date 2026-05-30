@@ -377,16 +377,16 @@ export const LabOrderListPage = () => {
                             <TableCell>
                               <Stack direction="row" spacing={2} alignItems="center">
                                 <Avatar sx={{ width: 36, height: 36, bgcolor: alpha(tokens.colors.primary, 0.06), color: tokens.colors.primary, fontSize: "0.9rem", fontWeight: 800 }}>
-                                  {order.patient.name[0]}
+                                  {(order.patient?.name?.[0] ?? "?").toUpperCase()}
                                 </Avatar>
                                 <Box>
                                   <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>#{order.orderNumber}</Typography>
-                                  <Typography variant="caption" sx={{ color: tokens.colors.onSurfaceVariant, fontWeight: 600 }}>{order.patient.name}</Typography>
+                                  <Typography variant="caption" sx={{ color: tokens.colors.onSurfaceVariant, fontWeight: 600 }}>{order.patient?.name ?? "Unknown patient"}</Typography>
                                 </Box>
                               </Stack>
                             </TableCell>
                             <TableCell>
-                              <Typography variant="body2" sx={{ fontWeight: 700 }}>{order.labTest.name}</Typography>
+                              <Typography variant="body2" sx={{ fontWeight: 700 }}>{order.labTest?.name ?? "Unknown test"}</Typography>
                               <Typography variant="caption" sx={{ color: tokens.colors.onSurfaceVariant, fontWeight: 500 }}>{order.priority}</Typography>
                             </TableCell>
                             <TableCell>

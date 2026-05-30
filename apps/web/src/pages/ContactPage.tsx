@@ -45,7 +45,14 @@ export const ContactPage: FC = () => {
 
             <Grid size={{ xs: 12, md: 7 }}>
               <Paper elevation={0} sx={{ p: { xs: 4, md: 8 }, borderRadius: "32px", ...glassmorphism, border: `1px solid ${tokens.colors.outlineVariant}` }}>
-                <Stack spacing={4}>
+                <Stack
+                  component="form"
+                  spacing={4}
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    // TODO: invoke contact API / mutation
+                  }}
+                >
                   <Grid container spacing={3}>
                     <Grid size={{ xs: 12, sm: 6 }}>
                       <TextField
@@ -88,6 +95,7 @@ export const ContactPage: FC = () => {
                     sx={{ '& .MuiOutlinedInput-root': { borderRadius: '16px' } }}
                   />
                   <Button 
+                    type="submit"
                     variant="contained" 
                     fullWidth 
                     sx={{ 

@@ -8,6 +8,7 @@ import {
   MenuItem,
   Box,
   Stack,
+  ButtonBase,
   alpha,
   Button,
 } from '@mui/material';
@@ -109,8 +110,11 @@ export const TopBar: React.FC = () => {
           >
             <Settings />
           </IconButton>
-          <Box
+          <ButtonBase
             onClick={handleMenu}
+            aria-haspopup="menu"
+            aria-controls={anchorEl ? 'menu-appbar' : undefined}
+            aria-expanded={Boolean(anchorEl)}
             sx={{
               display: 'flex',
               alignItems: 'center',
@@ -125,7 +129,8 @@ export const TopBar: React.FC = () => {
                 bgcolor: alpha(tokens.colors.primary, 0.04),
                 borderColor: alpha(tokens.colors.primary, 0.1)
               },
-              transition: 'all 0.2s'
+              transition: 'all 0.2s',
+              textAlign: 'left',
             }}
           >
             <AccountCircle sx={{ color: tokens.colors.onSurfaceVariant }} />
@@ -137,7 +142,7 @@ export const TopBar: React.FC = () => {
                 {currentUser?.role ?? 'Staff'}
               </Typography>
             </Box>
-          </Box>
+          </ButtonBase>
           <Menu
             id="menu-appbar"
             anchorEl={anchorEl}

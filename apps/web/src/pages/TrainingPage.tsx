@@ -193,7 +193,9 @@ export const TrainingPage: FC = () => {
                   </Box>
                 </Stack>
                 <Button 
-                  variant="outlined" 
+                  variant="outlined"
+                  component={RouterLink}
+                  to="/training/achievements"
                   fullWidth 
                   sx={{ 
                     mt: 6, 

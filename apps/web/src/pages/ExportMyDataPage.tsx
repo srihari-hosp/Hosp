@@ -29,7 +29,7 @@ export const ExportMyDataPage = () => {
     anchor.href = url;
     anchor.download = buildDownloadName(payload.user?.id);
     anchor.click();
-    URL.revokeObjectURL(url);
+    setTimeout(() => URL.revokeObjectURL(url), 100);
   };
 
   return (

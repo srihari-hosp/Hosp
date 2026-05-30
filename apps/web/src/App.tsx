@@ -191,7 +191,14 @@ function App() {
 
   useEffect(() => {
     if (meData?.id) {
-      setOnboardingState(readOnboardingState(meData.id));
+      const persisted = readOnboardingState(meData.id);
+      setOnboardingState((current) => {
+        if (!persisted.completed && current.completed) {
+          persistOnboardingState(current, meData.id);
+          return current;
+        }
+        return persisted;
+      });
     }
   }, [meData?.id]);
 
@@ -267,7 +274,9 @@ function App() {
       role: payload.role,
     };
     setOnboardingState(nextState);
-    persistOnboardingState(nextState, meData?.id);
+    if (meData?.id) {
+      persistOnboardingState(nextState, meData.id);
+    }
 
     const tenantId = meData?.tenantId ?? currentTenant?.id ?? 'onboarding-tenant';
     dispatch(

@@ -775,6 +775,9 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
 
     if (refreshed) {
       result = await rawBaseQuery(args, api, extraOptions);
+      if (isUnauthorized(result.error)) {
+        api.dispatch(logout());
+      }
     }
   }
 

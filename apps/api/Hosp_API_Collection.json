@@ -1,0 +1,699 @@
+{
+	"info": {
+		"_postman_id": "f78a2e1d-3b5c-4c8a-9d2e-1a2b3c4d5e6f",
+		"name": "Hosp API Local",
+		"description": "Collection for testing the Hosp Backend API locally.\n\n### Required Environment Variables:\n- `admin_email`: The admin email address\n- `admin_password`: The admin password",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"hospitalName\": \"City General Hospital\",\n    \"address\": \"123 Medical Square, Bangalore\",\n    \"phone\": \"+919876543210\",\n    \"email\": \"{{admin_email}}\",\n    \"password\": \"{{admin_password}}\",\n    \"licenseNo\": \"HOSP-BGL-001\",\n    \"gstin\": \"29AAAAA0000A1Z5\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.accessToken) {",
+									"    pm.collectionVariables.set(\"token\", jsonData.accessToken);",
+									"}",
+									"if (jsonData.refreshToken) {",
+									"    pm.collectionVariables.set(\"refreshToken\", jsonData.refreshToken);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{admin_email}}\",\n    \"password\": \"{{admin_password}}\",\n    \"rememberMe\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Me",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.accessToken) {",
+									"    pm.collectionVariables.set(\"token\", jsonData.accessToken);",
+									"}",
+									"if (jsonData.refreshToken) {",
+									"    pm.collectionVariables.set(\"refreshToken\", jsonData.refreshToken);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refreshToken\": \"{{refreshToken}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/refresh",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refreshToken\": \"{{refreshToken}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/logout",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Patients",
+			"item": [
+				{
+					"name": "List Patients",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/patients?search=",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"patients"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Patient",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"mrn\": \"MRN-1001\",\n    \"name\": \"John Doe\",\n    \"age\": 35,\n    \"gender\": \"MALE\",\n    \"phone\": \"9888877777\",\n    \"email\": \"john.doe@example.com\",\n    \"address\": \"45, Park Avenue, Bangalore\",\n    \"patientType\": \"OPD\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/patients",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"patients"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Patient",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/patients/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"patients",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Appointments",
+			"item": [
+				{
+					"name": "List Appointments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/appointments?date=2024-05-01",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"appointments"
+							],
+							"query": [
+								{
+									"key": "date",
+									"value": "2024-05-01"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Appointment",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"patientId\": \"{{patientId}}\",\n    \"doctorId\": \"{{doctorId}}\",\n    \"scheduledAt\": \"2024-05-01T10:30:00Z\",\n    \"notes\": \"Regular checkup\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/appointments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"appointments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Doctors",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/appointments/doctors",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"appointments",
+								"doctors"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Visits",
+			"item": [
+				{
+					"name": "Create Visit",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"appointmentId\": \"{{appointmentId}}\",\n    \"chiefComplaint\": \"Fever and cough\",\n    \"diagnosis\": \"Common Cold\",\n    \"notes\": \"Prescribed rest and hydration\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/visits",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"visits"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Prescription",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"medication\": \"Paracetamol\",\n    \"dosage\": \"500mg\",\n    \"frequency\": \"Twice daily\",\n    \"durationDays\": 5,\n    \"instructions\": \"After meals\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/visits/:id/prescription",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"visits",
+								":id",
+								"prescription"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Billing",
+			"item": [
+				{
+					"name": "List Invoices",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/invoices",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"invoices"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Invoice",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"patientId\": \"{{patientId}}\",\n    \"visitId\": \"{{visitId}}\",\n    \"dueDate\": \"2024-05-15T00:00:00Z\",\n    \"items\": [\n        {\n            \"description\": \"Consultation Fee\",\n            \"quantity\": 1,\n            \"unitPrice\": 500\n        },\n        {\n            \"description\": \"Blood Test\",\n            \"quantity\": 1,\n            \"unitPrice\": 250\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/invoices",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"invoices"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Labs",
+			"item": [
+				{
+					"name": "List Lab Tests",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/labs/tests",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"labs",
+								"tests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Lab Order",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"patientId\": \"{{patientId}}\",\n    \"doctorId\": \"{{doctorId}}\",\n    \"labTestId\": \"{{labTestId}}\",\n    \"priority\": \"ROUTINE\",\n    \"clinicalNotes\": \"Suspected infection\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/labs/orders",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"labs",
+								"orders"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Pharmacy",
+			"item": [
+				{
+					"name": "List Medicines",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pharmacy/medicines",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pharmacy",
+								"medicines"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Medicine",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Paracetamol 500mg\",\n    \"hsnCode\": \"300490\",\n    \"unitPrice\": 2.5,\n    \"gstRate\": 12,\n    \"scheduleCategory\": \"OTC\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/pharmacy/medicines",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pharmacy",
+								"medicines"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Medicine Batches",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/pharmacy/medicines/:id/batches",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"pharmacy",
+								"medicines",
+								":id",
+								"batches"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "System",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/health",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"health"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Audit Logs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/audit-logs?limit=50",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"audit-logs"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "50"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3001",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refreshToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "patientId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "doctorId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "appointmentId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "visitId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "labTestId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "medicineId",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

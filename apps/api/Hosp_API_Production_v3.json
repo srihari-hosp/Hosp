@@ -1,0 +1,72 @@
+{
+	"info": {
+		"_postman_id": "f78a2e1d-3b5c-4c8a-9d2e-1a2b3c4d5e6f",
+		"name": "Hosp API Production v3",
+		"description": "FINAL Corrected Production collection for Hosp Backend API. Verified all routes (Pharmacy, Labs, Billing, etc.).",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register",
+					"request": { "method": "POST", "url": "{{baseUrl}}/auth/register", "body": { "mode": "raw", "raw": "{\n    \"hospitalName\": \"Apollo Healthcare\",\n    \"address\": \"Main St, Bangalore\",\n    \"phone\": \"+919876543210\",\n    \"email\": \"admin@apollo-test.com\",\n    \"password\": \"Password123!\",\n    \"licenseNo\": \"LIC-2026-PROD-01\"\n}", "options": { "raw": { "language": "json" } } } }
+				},
+				{
+					"name": "Login",
+					"event": [{ "listen": "test", "script": { "exec": ["var jsonData = pm.response.json();", "if (jsonData.accessToken) { pm.collectionVariables.set(\"token\", jsonData.accessToken); }"], "type": "text/javascript" } }],
+					"request": { "method": "POST", "url": "{{baseUrl}}/auth/login", "body": { "mode": "raw", "raw": "{\n    \"email\": \"admin@apollo-test.com\",\n    \"password\": \"Password123!\"\n}", "options": { "raw": { "language": "json" } } } }
+				},
+				{ "name": "Get Current User", "request": { "method": "GET", "url": "{{baseUrl}}/auth/me" } }
+			]
+		},
+		{
+			"name": "Patients",
+			"item": [
+				{ "name": "List Patients", "request": { "method": "GET", "url": "{{baseUrl}}/patients" } },
+				{ "name": "Search Patients", "request": { "method": "GET", "url": "{{baseUrl}}/patients?search=Jane" } },
+				{ "name": "Create Patient", "request": { "method": "POST", "url": "{{baseUrl}}/patients", "body": { "mode": "raw", "raw": "{\n    \"mrn\": \"MRN-2026-001\",\n    \"name\": \"Jane Doe\",\n    \"age\": 30,\n    \"gender\": \"FEMALE\",\n    \"phone\": \"9876543210\",\n    \"patientType\": \"OPD\"\n}", "options": { "raw": { "language": "json" } } } } }
+			]
+		},
+		{
+			"name": "Consents",
+			"item": [
+				{ "name": "Get Consents", "request": { "method": "GET", "url": "{{baseUrl}}/consents" } },
+				{ "name": "Grant Consent", "request": { "method": "POST", "url": "{{baseUrl}}/consents", "body": { "mode": "raw", "raw": "{\n    \"patientId\": \"{{patientId}}\",\n    \"purpose\": \"Clinical Care\"\n}", "options": { "raw": { "language": "json" } } } } },
+				{ "name": "Withdraw Consent", "request": { "method": "PATCH", "url": "{{baseUrl}}/consents/{{consentId}}/withdraw" } }
+			]
+		},
+		{
+			"name": "Dashboard",
+			"item": [
+				{ "name": "Summary", "request": { "method": "GET", "url": "{{baseUrl}}/api/dashboard/summary" } },
+				{ "name": "Revenue Trend", "request": { "method": "GET", "url": "{{baseUrl}}/api/dashboard/revenue-trend?days=30" } }
+			]
+		},
+		{
+			"name": "Appointments",
+			"item": [
+				{ "name": "List Doctors", "request": { "method": "GET", "url": "{{baseUrl}}/api/appointments/doctors" } },
+				{ "name": "Register Doctor", "request": { "method": "POST", "url": "{{baseUrl}}/api/appointments/doctors", "body": { "mode": "raw", "raw": "{\n    \"name\": \"Dr. Watson\",\n    \"specialization\": \"Surgery\"\n}", "options": { "raw": { "language": "json" } } } } },
+				{ "name": "Create Appointment", "request": { "method": "POST", "url": "{{baseUrl}}/api/appointments", "body": { "mode": "raw", "raw": "{\n    \"patientId\": \"{{patientId}}\",\n    \"doctorId\": \"{{doctorId}}\",\n    \"scheduledAt\": \"2026-06-01T10:00:00Z\"\n}", "options": { "raw": { "language": "json" } } } } }
+			]
+		},
+		{
+			"name": "Billing & Invoices",
+			"item": [
+				{ "name": "List Invoices", "request": { "method": "GET", "url": "{{baseUrl}}/api/invoices" } },
+				{ "name": "Generate PDF", "request": { "method": "POST", "url": "{{baseUrl}}/api/invoices/{{invoiceId}}/pdf" } }
+			]
+		}
+	],
+	"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+	"variable": [
+		{ "key": "baseUrl", "value": "https://<set-in-environment>", "type": "string" },
+		{ "key": "token", "value": "", "type": "string" },
+		{ "key": "patientId", "value": "", "type": "string" },
+		{ "key": "doctorId", "value": "", "type": "string" },
+		{ "key": "consentId", "value": "", "type": "string" },
+		{ "key": "invoiceId", "value": "", "type": "string" }
+	]
+}

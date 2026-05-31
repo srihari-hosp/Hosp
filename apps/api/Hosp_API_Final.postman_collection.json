@@ -1,0 +1,341 @@
+{
+  "info": {
+    "name": "Hosp API Final",
+    "description": "Ready-to-import Postman collection for deployed Hosp API. Set base_url in the environment before testing.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.request.headers.upsert({ key: 'Content-Type', value: 'application/json' });",
+          "pm.request.headers.upsert({ key: 'x-consent-version', value: pm.environment.get('consent_version') || 'v1' });",
+          "pm.request.headers.upsert({ key: 'x-purpose', value: pm.environment.get('purpose') || 'Postman testing' });"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "System",
+      "item": [
+        {
+          "name": "Root",
+          "request": {
+            "method": "GET",
+            "auth": { "type": "noauth" },
+            "url": "{{base_url}}/"
+          }
+        },
+        {
+          "name": "Health",
+          "request": {
+            "method": "GET",
+            "auth": { "type": "noauth" },
+            "url": "{{base_url}}/health"
+          }
+        },
+        {
+          "name": "API Health",
+          "request": {
+            "method": "GET",
+            "auth": { "type": "noauth" },
+            "url": "{{base_url}}/api/health"
+          }
+        },
+        {
+          "name": "Audit Logs",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/audit-logs?limit=50"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register Hospital Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "const data = json.data || json;",
+                  "if (data.accessToken || json.accessToken) pm.environment.set('access_token', data.accessToken || json.accessToken);",
+                  "if (data.refreshToken || json.refreshToken) pm.environment.set('refresh_token', data.refreshToken || json.refreshToken);",
+                  "if (data.user) { pm.environment.set('user_id', data.user.id); pm.environment.set('hospital_id', data.user.hospitalId || data.user.tenantId); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": { "type": "noauth" },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hospitalName\": \"Postman Test Hospital\",\n  \"address\": \"Hyderabad\",\n  \"phone\": \"9876543210\",\n  \"email\": \"{{admin_email}}\",\n  \"password\": \"{{admin_password}}\",\n  \"licenseNo\": \"LIC-{{$timestamp}}\",\n  \"gstin\": \"36ABCDE1234F1Z5\"\n}"
+            },
+            "url": "{{base_url}}/api/auth/register"
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.mfaRequired && json.mfaToken) pm.environment.set('mfa_token', json.mfaToken);",
+                  "const data = json.data || json;",
+                  "if (data.accessToken || json.accessToken) pm.environment.set('access_token', data.accessToken || json.accessToken);",
+                  "if (data.refreshToken || json.refreshToken) pm.environment.set('refresh_token', data.refreshToken || json.refreshToken);",
+                  "if (data.user) { pm.environment.set('user_id', data.user.id); pm.environment.set('hospital_id', data.user.hospitalId || data.user.tenantId); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": { "type": "noauth" },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{admin_email}}\",\n  \"password\": \"{{admin_password}}\",\n  \"rememberMe\": true\n}"
+            },
+            "url": "{{base_url}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "const data = json.data || json;",
+                  "if (data.accessToken || json.accessToken) pm.environment.set('access_token', data.accessToken || json.accessToken);",
+                  "if (data.refreshToken || json.refreshToken) pm.environment.set('refresh_token', data.refreshToken || json.refreshToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "auth": { "type": "noauth" },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}"
+            },
+            "url": "{{base_url}}/api/auth/refresh-token"
+          }
+        },
+        {
+          "name": "Me",
+          "request": { "method": "GET", "url": "{{base_url}}/api/auth/me" }
+        },
+        {
+          "name": "MFA Setup",
+          "request": { "method": "POST", "url": "{{base_url}}/api/auth/mfa/setup" }
+        },
+        {
+          "name": "MFA Verify",
+          "request": {
+            "method": "POST",
+            "body": { "mode": "raw", "raw": "{\n  \"code\": \"123456\"\n}" },
+            "url": "{{base_url}}/api/auth/mfa/verify"
+          }
+        },
+        {
+          "name": "MFA Enable",
+          "request": {
+            "method": "POST",
+            "body": { "mode": "raw", "raw": "{\n  \"code\": \"123456\"\n}" },
+            "url": "{{base_url}}/api/auth/mfa/enable"
+          }
+        },
+        {
+          "name": "MFA Disable",
+          "request": { "method": "POST", "url": "{{base_url}}/api/auth/mfa/disable" }
+        },
+        {
+          "name": "MFA Backup Codes",
+          "request": { "method": "POST", "url": "{{base_url}}/api/auth/mfa/backup-codes" }
+        },
+        {
+          "name": "Export My Data",
+          "request": { "method": "GET", "url": "{{base_url}}/api/auth/export-my-data" }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "body": { "mode": "raw", "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}" },
+            "url": "{{base_url}}/api/auth/logout"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Patients",
+      "item": [
+        {
+          "name": "Create Patient",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["const json = pm.response.json();", "if (json.patient?.id) pm.environment.set('patient_id', json.patient.id);"] } }],
+          "request": {
+            "method": "POST",
+            "body": { "mode": "raw", "raw": "{\n  \"mrn\": \"MRN-{{$timestamp}}\",\n  \"name\": \"Test Patient\",\n  \"age\": 30,\n  \"gender\": \"MALE\",\n  \"phone\": \"9876543210\",\n  \"email\": \"patient{{$timestamp}}@example.com\",\n  \"address\": \"Hyderabad\",\n  \"patientType\": \"OPD\"\n}" },
+            "url": "{{base_url}}/patients"
+          }
+        },
+        { "name": "List Patients", "request": { "method": "GET", "url": "{{base_url}}/patients?search=" } },
+        { "name": "Get Patient", "request": { "method": "GET", "url": "{{base_url}}/patients/{{patient_id}}" } },
+        {
+          "name": "Update Patient",
+          "request": { "method": "PATCH", "body": { "mode": "raw", "raw": "{\n  \"address\": \"Updated Address\",\n  \"phone\": \"9876543210\"\n}" }, "url": "{{base_url}}/patients/{{patient_id}}" }
+        },
+        { "name": "Delete Patient", "request": { "method": "DELETE", "url": "{{base_url}}/patients/{{patient_id}}" } }
+      ]
+    },
+    {
+      "name": "Appointments",
+      "item": [
+        {
+          "name": "Create Doctor",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["const json = pm.response.json();", "if (json.doctor?.id) pm.environment.set('doctor_id', json.doctor.id);"] } }],
+          "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\n  \"name\": \"Dr Postman\",\n  \"specialization\": \"General Medicine\"\n}" }, "url": "{{base_url}}/api/appointments/doctors" }
+        },
+        { "name": "List Doctors", "request": { "method": "GET", "url": "{{base_url}}/api/appointments/doctors" } },
+        {
+          "name": "Create Appointment",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["const json = pm.response.json();", "if (json.appointment?.id) pm.environment.set('appointment_id', json.appointment.id);"] } }],
+          "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\n  \"patientId\": \"{{patient_id}}\",\n  \"doctorId\": \"{{doctor_id}}\",\n  \"scheduledAt\": \"2026-05-12T10:00:00.000Z\",\n  \"notes\": \"Postman appointment\"\n}" }, "url": "{{base_url}}/api/appointments" }
+        },
+        { "name": "List Appointments", "request": { "method": "GET", "url": "{{base_url}}/api/appointments?date=2026-05-12&doctorId={{doctor_id}}&status=SCHEDULED" } },
+        { "name": "Availability", "request": { "method": "GET", "url": "{{base_url}}/api/appointments/availability?doctorId={{doctor_id}}&date=2026-05-12" } },
+        { "name": "Update Appointment Status", "request": { "method": "PATCH", "body": { "mode": "raw", "raw": "{\n  \"status\": \"SCHEDULED\"\n}" }, "url": "{{base_url}}/api/appointments/{{appointment_id}}/status" } }
+      ]
+    },
+    {
+      "name": "Visits",
+      "item": [
+        {
+          "name": "Create Visit",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["const json = pm.response.json();", "if (json.visit?.id) pm.environment.set('visit_id', json.visit.id);"] } }],
+          "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\n  \"appointmentId\": \"{{appointment_id}}\",\n  \"chiefComplaint\": \"Fever and cough\",\n  \"diagnosis\": \"Viral fever\",\n  \"notes\": \"Rest advised\"\n}" }, "url": "{{base_url}}/api/visits" }
+        },
+        { "name": "Get Visit", "request": { "method": "GET", "url": "{{base_url}}/api/visits/{{visit_id}}" } },
+        { "name": "Get Visit By Appointment", "request": { "method": "GET", "url": "{{base_url}}/api/visits/by-appointment/{{appointment_id}}" } },
+        { "name": "Update Visit", "request": { "method": "PATCH", "body": { "mode": "raw", "raw": "{\n  \"diagnosis\": \"Updated diagnosis\",\n  \"notes\": \"Updated notes\"\n}" }, "url": "{{base_url}}/api/visits/{{visit_id}}" } },
+        {
+          "name": "Add Prescription",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["const json = pm.response.json();", "if (json.prescription?.id) pm.environment.set('prescription_id', json.prescription.id);", "if (json.jobId) pm.environment.set('job_id', json.jobId);"] } }],
+          "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\n  \"medication\": \"Paracetamol\",\n  \"dosage\": \"500mg\",\n  \"frequency\": \"Twice daily\",\n  \"durationDays\": 5,\n  \"instructions\": \"After food\"\n}" }, "url": "{{base_url}}/api/visits/{{visit_id}}/prescription" }
+        }
+      ]
+    },
+    {
+      "name": "Invoices",
+      "item": [
+        {
+          "name": "Create Invoice",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["const json = pm.response.json();", "if (json.invoice?.id) pm.environment.set('invoice_id', json.invoice.id);"] } }],
+          "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\n  \"patientId\": \"{{patient_id}}\",\n  \"visitId\": \"{{visit_id}}\",\n  \"dueDate\": \"2026-05-20T00:00:00.000Z\",\n  \"notes\": \"Postman invoice\",\n  \"items\": [\n    {\n      \"description\": \"Consultation Fee\",\n      \"quantity\": 1,\n      \"unitPrice\": 500\n    }\n  ]\n}" }, "url": "{{base_url}}/api/invoices" }
+        },
+        { "name": "List Invoices", "request": { "method": "GET", "url": "{{base_url}}/api/invoices?status=UNPAID&patientId={{patient_id}}" } },
+        { "name": "Get Invoice", "request": { "method": "GET", "url": "{{base_url}}/api/invoices/{{invoice_id}}" } },
+        { "name": "Queue Invoice PDF", "request": { "method": "POST", "url": "{{base_url}}/api/invoices/{{invoice_id}}/pdf" } },
+        { "name": "Record Payment", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\n  \"amount\": 500,\n  \"method\": \"CASH\",\n  \"referenceNo\": \"POSTMAN-001\",\n  \"notes\": \"Paid in cash\"\n}" }, "url": "{{base_url}}/api/invoices/{{invoice_id}}/payment" } }
+      ]
+    },
+    {
+      "name": "Pharmacy",
+      "item": [
+        {
+          "name": "Create Medicine",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["const json = pm.response.json();", "if (json.medicine?.id) pm.environment.set('medicine_id', json.medicine.id);"] } }],
+          "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\n  \"name\": \"Paracetamol 500mg\",\n  \"genericName\": \"Paracetamol\",\n  \"manufacturer\": \"Test Pharma\",\n  \"hsnCode\": \"3004\",\n  \"gstRate\": 12,\n  \"unitPrice\": 20,\n  \"scheduleCategory\": \"OTC\",\n  \"isActive\": true\n}" }, "url": "{{base_url}}/api/pharmacy/medicines" }
+        },
+        { "name": "List Medicines", "request": { "method": "GET", "url": "{{base_url}}/api/pharmacy/medicines?search=&isActive=true" } },
+        { "name": "Get Medicine", "request": { "method": "GET", "url": "{{base_url}}/api/pharmacy/medicines/{{medicine_id}}" } },
+        { "name": "Update Medicine", "request": { "method": "PATCH", "body": { "mode": "raw", "raw": "{\n  \"unitPrice\": 22,\n  \"isActive\": true\n}" }, "url": "{{base_url}}/api/pharmacy/medicines/{{medicine_id}}" } },
+        {
+          "name": "Create Stock Batch",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["const json = pm.response.json();", "if (json.batch?.id) pm.environment.set('batch_id', json.batch.id);"] } }],
+          "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\n  \"batchNo\": \"BATCH-{{$timestamp}}\",\n  \"vendorName\": \"Test Vendor\",\n  \"expiryDate\": \"2027-05-01T00:00:00.000Z\",\n  \"receivedQty\": 100,\n  \"availableQty\": 100,\n  \"purchasePrice\": 10,\n  \"mrp\": 20,\n  \"notes\": \"Postman stock\"\n}" }, "url": "{{base_url}}/api/pharmacy/medicines/{{medicine_id}}/batches" }
+        },
+        { "name": "List Batches", "request": { "method": "GET", "url": "{{base_url}}/api/pharmacy/medicines/{{medicine_id}}/batches?includeExpired=false" } },
+        { "name": "Update Batch", "request": { "method": "PATCH", "body": { "mode": "raw", "raw": "{\n  \"availableQty\": 90,\n  \"notes\": \"Updated stock\"\n}" }, "url": "{{base_url}}/api/pharmacy/batches/{{batch_id}}" } },
+        { "name": "Dispense", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\n  \"prescriptionId\": \"{{prescription_id}}\",\n  \"medicineId\": \"{{medicine_id}}\",\n  \"quantity\": 2,\n  \"stockBatchId\": \"{{batch_id}}\",\n  \"notes\": \"Postman dispense\"\n}" }, "url": "{{base_url}}/api/pharmacy/dispense" } }
+      ]
+    },
+    {
+      "name": "Labs",
+      "item": [
+        {
+          "name": "Create Lab Test",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["const json = pm.response.json();", "if (json.test?.id) pm.environment.set('lab_test_id', json.test.id);"] } }],
+          "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\n  \"name\": \"Complete Blood Count\",\n  \"code\": \"CBC-{{$timestamp}}\",\n  \"category\": \"Hematology\",\n  \"sampleType\": \"Blood\",\n  \"defaultUnit\": \"cells/uL\",\n  \"referenceRange\": \"Normal range\",\n  \"instructions\": \"Fasting not required\"\n}" }, "url": "{{base_url}}/api/labs/tests" }
+        },
+        { "name": "List Lab Tests", "request": { "method": "GET", "url": "{{base_url}}/api/labs/tests" } },
+        {
+          "name": "Create Lab Order",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["const json = pm.response.json();", "if (json.order?.id) pm.environment.set('lab_order_id', json.order.id);"] } }],
+          "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\n  \"patientId\": \"{{patient_id}}\",\n  \"doctorId\": \"{{doctor_id}}\",\n  \"labTestId\": \"{{lab_test_id}}\",\n  \"visitId\": \"{{visit_id}}\",\n  \"priority\": \"ROUTINE\",\n  \"notes\": \"Postman order\",\n  \"clinicalNotes\": \"Fever\"\n}" }, "url": "{{base_url}}/api/labs/orders" }
+        },
+        { "name": "List Lab Orders", "request": { "method": "GET", "url": "{{base_url}}/api/labs/orders?patientId={{patient_id}}" } },
+        { "name": "Update Lab Result", "request": { "method": "PATCH", "body": { "mode": "raw", "raw": "{\n  \"resultValue\": \"Normal\",\n  \"unit\": \"cells/uL\",\n  \"referenceRange\": \"Normal range\",\n  \"interpretation\": \"Within range\",\n  \"remarks\": \"No abnormality detected\",\n  \"status\": \"FINAL\",\n  \"observedAt\": \"2026-05-11T10:00:00.000Z\",\n  \"reportedAt\": \"2026-05-11T11:00:00.000Z\",\n  \"verifiedAt\": \"2026-05-11T11:30:00.000Z\",\n  \"collectedAt\": \"2026-05-11T09:30:00.000Z\"\n}" }, "url": "{{base_url}}/api/labs/orders/{{lab_order_id}}/result" } },
+        { "name": "Lab Report PDF", "request": { "method": "GET", "url": "{{base_url}}/api/labs/orders/{{lab_order_id}}/report/pdf" } }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        { "name": "Summary", "request": { "method": "GET", "url": "{{base_url}}/api/dashboard/summary" } },
+        { "name": "Appointments Trend", "request": { "method": "GET", "url": "{{base_url}}/api/dashboard/appointments-trend?days=7" } },
+        { "name": "Revenue Trend", "request": { "method": "GET", "url": "{{base_url}}/api/dashboard/revenue-trend?days=30" } }
+      ]
+    },
+    {
+      "name": "Consents",
+      "item": [
+        { "name": "List Consents", "request": { "method": "GET", "url": "{{base_url}}/consents" } },
+        {
+          "name": "Grant Consent",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["const json = pm.response.json();", "if (json.consent?.id) pm.environment.set('consent_id', json.consent.id);"] } }],
+          "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\n  \"patientId\": \"{{patient_id}}\",\n  \"purpose\": \"Treatment and billing\",\n  \"dataTypes\": [\"demographics\", \"clinical\", \"billing\"],\n  \"expiryAt\": \"2027-05-11T00:00:00.000Z\"\n}" }, "url": "{{base_url}}/consents" }
+        },
+        { "name": "Revoke Consent", "request": { "method": "PATCH", "url": "{{base_url}}/consents/{{consent_id}}/revoke" } },
+        { "name": "Withdraw Consent", "request": { "method": "PATCH", "url": "{{base_url}}/consents/{{consent_id}}/withdraw" } }
+      ]
+    },
+    {
+      "name": "Queues",
+      "item": [
+        { "name": "Queue Status", "request": { "method": "GET", "url": "{{base_url}}/api/queues/status" } },
+        { "name": "Job Status", "request": { "method": "GET", "url": "{{base_url}}/api/queues/status?queue={{queue_name}}&jobId={{job_id}}" } }
+      ]
+    }
+  ]
+}

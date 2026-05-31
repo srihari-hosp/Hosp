@@ -1,0 +1,396 @@
+{
+	"info": {
+		"_postman_id": "f78a2e1d-3b5c-4c8a-9d2e-1a2b3c4d5e6f",
+		"name": "Hosp API Production v2",
+		"description": "Updated Production collection for Hosp Backend API on Railway. Includes Doctor management and MFA.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"hospitalName\": \"Apollo Healthcare\",\n    \"address\": \"Main St, Bangalore\",\n    \"phone\": \"+919876543210\",\n    \"email\": \"admin@apollo-test.com\",\n    \"password\": \"Password123!\",\n    \"licenseNo\": \"LIC-2026-PROD-01\",\n    \"gstin\": \"29AAAAA0000A1Z5\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.accessToken) {",
+									"    pm.collectionVariables.set(\"token\", jsonData.accessToken);",
+									"}",
+									"if (jsonData.refreshToken) {",
+									"    pm.collectionVariables.set(\"refreshToken\", jsonData.refreshToken);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@apollo-test.com\",\n    \"password\": \"Password123!\",\n    \"rememberMe\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Current User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"me"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "MFA",
+			"item": [
+				{
+					"name": "Enable MFA",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/mfa/enable",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"mfa",
+								"enable"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify MFA",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"mfaCode\": \"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/mfa/verify",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"mfa",
+								"verify"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Patients",
+			"item": [
+				{
+					"name": "List Patients",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/patients",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"patients"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search Patients",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/patients?search=test",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"patients"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "test"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Patient",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"mrn\": \"MRN-PROD-2026\",\n    \"name\": \"Jane Smith\",\n    \"age\": 28,\n    \"gender\": \"FEMALE\",\n    \"phone\": \"+919876543210\",\n    \"email\": \"jane.smith@example.com\",\n    \"patientType\": \"OPD\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/patients",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"patients"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Consents",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/consents",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"consents"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Grant Consent",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"patientId\": \"{{patientId}}\",\n    \"purpose\": \"Clinical Treatment\",\n    \"dataTypes\": [\"DEMOGRAPHICS\", \"VITALS\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/consents",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"consents"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Withdraw Consent",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/consents/{{consentId}}/withdraw",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"consents",
+								"{{consentId}}",
+								"withdraw"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Appointments",
+			"item": [
+				{
+					"name": "List Doctors",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/appointments/doctors",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"appointments",
+								"doctors"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register Doctor",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Dr. Apollo\",\n    \"specialization\": \"General Medicine\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/appointments/doctors",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"appointments",
+								"doctors"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Appointments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/appointments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"appointments"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://hosp-production-1719.up.railway.app",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refreshToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "patientId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "consentId",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

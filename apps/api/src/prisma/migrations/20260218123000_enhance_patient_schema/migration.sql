@@ -1,0 +1,39 @@
+-- Make MRN unique per hospital (tenant scoped) and add core patient profile fields
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_indexes
+    WHERE schemaname = current_schema()
+      AND indexname = 'Patient_mrn_key'
+  ) THEN
+    DROP INDEX "Patient_mrn_key";
+  END IF;
+END $$;
+
+ALTER TABLE "Patient"
+ADD COLUMN IF NOT EXISTS "dateOfBirth" TIMESTAMP(3);
+
+UPDATE "Patient" 
+SET "dateOfBirth" = NOW() - ("age" || ' years')::interval 
+WHERE "dateOfBirth" IS NULL;
+
+ALTER TABLE "Patient" 
+ALTER COLUMN "dateOfBirth" SET NOT NULL;
+
+ALTER TABLE "Patient"
+ADD COLUMN IF NOT EXISTS "bloodGroup" TEXT,
+ADD COLUMN IF NOT EXISTS "emergencyContactName" TEXT,
+ADD COLUMN IF NOT EXISTS "emergencyContactPhone" TEXT,
+ADD COLUMN IF NOT EXISTS "notes" TEXT,
+ADD COLUMN IF NOT EXISTS "isActive" BOOLEAN NOT NULL DEFAULT true;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'Patient_hospitalId_mrn_key'
+  ) THEN
+    ALTER TABLE "Patient" ADD CONSTRAINT "Patient_hospitalId_mrn_key" UNIQUE ("hospitalId", "mrn");
+  END IF;
+END $$;

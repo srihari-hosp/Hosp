@@ -25,10 +25,10 @@ export const authSlice = createSlice({
       state.error = null;
     },
     loginSuccess: (state, action: PayloadAction<{ token?: string } | undefined>) => {
+      state.isAuthenticated = true;
+      state.status = "authenticated";
+      state.error = null;
       if (action.payload?.token) {
-        state.isAuthenticated = true;
-        state.status = "authenticated";
-        state.error = null;
         state.token = action.payload.token;
       }
     },

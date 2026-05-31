@@ -215,25 +215,29 @@ export const createUnifiedPrismaClient = (): PrismaClient => {
 
           // 2. Pre-Query RLS Enforcements (Tenant Isolation)
           if (normalizedModel && isRlsModel(normalizedModel)) {
-            if (!hospitalId) {
+            const isGlobalAuthLookup = normalizedModel === 'user' && operation === 'findUnique' && !!mutableArgs?.where?.email;
+
+            if (!hospitalId && !isGlobalAuthLookup) {
               throw new Error(`Missing tenant context for ${model}.${operation}`);
             }
 
-            if (['create', 'update'].includes(operation)) {
-              enforceTenantInData(mutableArgs.data, normalizedModel, hospitalId, operation === 'update');
-            } else if (operation === 'createMany') {
-              if (Array.isArray(mutableArgs.data)) {
-                for (const row of mutableArgs.data) enforceTenantInData(row, normalizedModel, hospitalId);
-              } else {
-                enforceTenantInData(mutableArgs.data, normalizedModel, hospitalId);
+            if (hospitalId) {
+              if (['create', 'update'].includes(operation)) {
+                enforceTenantInData(mutableArgs.data, normalizedModel, hospitalId, operation === 'update');
+              } else if (operation === 'createMany') {
+                if (Array.isArray(mutableArgs.data)) {
+                  for (const row of mutableArgs.data) enforceTenantInData(row, normalizedModel, hospitalId);
+                } else {
+                  enforceTenantInData(mutableArgs.data, normalizedModel, hospitalId);
+                }
+              } else if (operation === 'upsert') {
+                enforceTenantInData(mutableArgs.create, normalizedModel, hospitalId);
+                enforceTenantInData(mutableArgs.update, normalizedModel, hospitalId, true);
               }
-            } else if (operation === 'upsert') {
-              enforceTenantInData(mutableArgs.create, normalizedModel, hospitalId);
-              enforceTenantInData(mutableArgs.update, normalizedModel, hospitalId, true);
-            }
 
-            if (FILTERABLE_OPERATIONS.has(operation)) {
-              appendTenantWhere(mutableArgs, normalizedModel, hospitalId, operation);
+              if (FILTERABLE_OPERATIONS.has(operation)) {
+                appendTenantWhere(mutableArgs, normalizedModel, hospitalId, operation);
+              }
             }
           }
 

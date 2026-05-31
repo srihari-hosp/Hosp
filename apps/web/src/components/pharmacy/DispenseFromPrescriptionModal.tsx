@@ -189,6 +189,12 @@ export const DispenseFromPrescriptionModal = ({
       }).unwrap();
       setSuccessText(response.message ?? "Medicine dispensed successfully.");
       onDispensed?.();
+      // Reset form so a subsequent dispense starts fresh
+      setAppointmentId("");
+      setPrescriptionId("");
+      setQuantity("1");
+      setNotes("");
+      setSubmitAttempted(false);
     } catch (error) {
       setErrorText(parseApiError(error));
     }
@@ -357,7 +363,7 @@ export const DispenseFromPrescriptionModal = ({
         <Button onClick={handleClose} disabled={isDispensing}>
           Close
         </Button>
-        <Button variant="contained" onClick={() => void handleSubmit()} disabled={isDispensing || !isFormValid}>
+        <Button variant="contained" onClick={() => void handleSubmit()} disabled={isDispensing || !isFormValid || Boolean(successText)}>
           {isDispensing ? "Dispensing..." : "Dispense"}
         </Button>
       </DialogActions>

@@ -48,8 +48,8 @@ export const LandingPage: FC = () => {
                   <Button variant="contained" component={RouterLink} to="/register" sx={{ bgcolor: tokens.colors.primary, color: "#fff", px: 4, py: 1.5, borderRadius: tokens.shape.borderRadius.full, ...tokens.typography.labelMd, textTransform: "none", boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)", "&:hover": { bgcolor: tokens.colors.primary, transform: "scale(0.95)" }, transition: "all 0.2s" }}>
                     Get Started Free
                   </Button>
-                  <Button variant="outlined" component={RouterLink} to="/case-studies" sx={{ outline: `1px solid ${tokens.colors.outlineVariant}`, color: tokens.colors.primary, px: 4, py: 1.5, borderRadius: tokens.shape.borderRadius.full, ...tokens.typography.labelMd, textTransform: "none", "&:hover": { bgcolor: alpha(tokens.colors.primary, 0.05), outline: `1px solid ${tokens.colors.outlineVariant}` }, transition: "all 0.2s" }}>
-                    View Case Studies
+                  <Button variant="outlined" component={RouterLink} to="/modules" sx={{ outline: `1px solid ${tokens.colors.outlineVariant}`, color: tokens.colors.primary, px: 4, py: 1.5, borderRadius: tokens.shape.borderRadius.full, ...tokens.typography.labelMd, textTransform: "none", "&:hover": { bgcolor: alpha(tokens.colors.primary, 0.05), outline: `1px solid ${tokens.colors.outlineVariant}` }, transition: "all 0.2s" }}>
+                    Explore Features
                   </Button>
                 </Stack>
               </Box>

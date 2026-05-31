@@ -88,10 +88,10 @@ const Footer = () => (
           <Typography component="h5" sx={{ ...tokens.typography.labelMd, color: tokens.colors.onSurface, mb: 1.5 }}>Resources</Typography>
           <Stack spacing={1}>
             {[
-              { label: "Staff Directory", to: "/dashboard" },
+              { label: "Departments", to: "/departments" },
               { label: "API Documentation", to: "/integrations" },
-              { label: "Pharmacy Inventory", to: "/pharmacy" },
-              { label: "Laboratory Results", to: "/lab" }
+              { label: "Platform Modules", to: "/modules" },
+              { label: "Training Resources", to: "/training" }
             ].map(item => (
               <Typography key={item.label} component={RouterLink} to={item.to} sx={{ ...tokens.typography.bodySm, color: tokens.colors.onSurfaceVariant, textDecoration: "none", "&:hover": { color: tokens.colors.primary } }}>{item.label}</Typography>
             ))}

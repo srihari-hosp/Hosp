@@ -218,7 +218,7 @@ export const InvoiceDetailsDrawer = ({
                   label="Amount"
                   value={amount}
                   onChange={(event) => setAmount(event.target.value)}
-                  inputProps={{ min: 0.01, max: balance, step: "0.01" }}
+                  slotProps={{ htmlInput: { min: 0.01, max: balance, step: "0.01" } }}
                   error={submitAttempted && !isAmountValid}
                   helperText={
                     submitAttempted && !isAmountValid ? `Enter amount > 0 and <= ${balance.toFixed(2)}.` : ""

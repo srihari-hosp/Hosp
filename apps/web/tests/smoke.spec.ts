@@ -47,10 +47,13 @@ test('api smoke: login and create patient', async ({ request }) => {
 
   const patientText = await createPatient.text();
   console.log('CREATE PATIENT STATUS:', createPatient.status());
-  console.log('CREATE PATIENT BODY:', patientText);
 
   expect(createPatient.ok()).toBeTruthy();
 
   const patientJson = JSON.parse(patientText);
-  expect(patientJson.patient?.id).toBeTruthy();
+  const patientId = patientJson.patient?.id;
+  if (patientId) {
+    console.log('CREATE PATIENT ID:', `${patientId.substring(0, 8)}...`);
+  }
+  expect(patientId).toBeTruthy();
 });

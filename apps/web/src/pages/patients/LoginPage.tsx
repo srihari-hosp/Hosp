@@ -21,7 +21,7 @@ import {
   LocalHospital,
   ArrowBack,
 } from '@mui/icons-material';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useLocation, useNavigate, Link as RouterLink } from 'react-router-dom';
 import { useLoginMutation } from '../../store/api';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
@@ -69,8 +69,10 @@ const isValidEmail = (value: string): boolean => {
 };
 
 export const LoginPage = () => {
+  const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const routeState = location.state as { message?: string } | null;
   const authError = useAppSelector((state) => state.auth.error);
   const [login, { isLoading }] = useLoginMutation();
 
@@ -290,6 +292,12 @@ export const LoginPage = () => {
             {authError && (
               <Alert severity="error" sx={{ borderRadius: '8px' }}>
                 {authError}
+              </Alert>
+            )}
+
+            {routeState?.message && (
+              <Alert severity="success" sx={{ borderRadius: '8px' }}>
+                {routeState.message}
               </Alert>
             )}
 

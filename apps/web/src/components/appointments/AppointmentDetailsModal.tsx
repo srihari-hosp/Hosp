@@ -76,7 +76,8 @@ export const AppointmentDetailsModal = ({
 
   const canComplete = appointment.status === "SCHEDULED" || appointment.status === "NO_SHOW";
   const canCancel = appointment.status === "SCHEDULED";
-  const canStartVisit = appointment.status !== "CANCELLED";
+  const canStartVisit =
+    appointment.status === "SCHEDULED" || appointment.status === "NO_SHOW";
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">

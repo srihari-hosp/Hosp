@@ -230,6 +230,7 @@ export const VisitFormPage = () => {
     } else {
       window.open(blobUrl, "_blank", "noopener,noreferrer");
     }
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
   };
 
   const waitForQueuedPdf = async (jobId: string): Promise<string | null> => {
@@ -270,7 +271,10 @@ export const VisitFormPage = () => {
       return;
     }
 
-    const pdfWindow = window.open("about:blank", "_blank", "noopener,noreferrer");
+    const pdfWindow = window.open("about:blank", "_blank", "noreferrer");
+    if (pdfWindow) {
+      pdfWindow.opener = null;
+    }
 
     if (!prescriptionDirty) {
       if (lastPdfUrl) {

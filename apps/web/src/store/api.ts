@@ -874,11 +874,11 @@ export const api = createApi({
         method: "POST",
       }),
     }),
-    generateBackupCodes: builder.query<{ success: boolean; message?: string; backupCodes: string[] }, void>({
-      query: () => "/api/auth/mfa/backup-codes",
+    generateBackupCodes: builder.mutation<{ success: boolean; message?: string; backupCodes: string[] }, void>({
+      query: () => ({ url: "/api/auth/mfa/backup-codes", method: "GET" }),
     }),
-    exportMyData: builder.query<MyDataExport, void>({
-      query: () => "/auth/export-my-data",
+    exportMyData: builder.mutation<MyDataExport, void>({
+      query: () => ({ url: "/auth/export-my-data", method: "GET" }),
     }),
     getDashboardSummary: builder.query<DashboardSummaryResponse, void>({
       query: () => "/api/dashboard/summary",
@@ -1217,7 +1217,7 @@ export const api = createApi({
 
 export const {
   useGetConsentsQuery,
-  useExportMyDataQuery,
+  useExportMyDataMutation,
   useGetDashboardSummaryQuery,
   useGetDashboardAppointmentsTrendQuery,
   useGetDashboardRevenueTrendQuery,
@@ -1261,5 +1261,5 @@ export const {
   useVerifyMfaMutation,
   useEnableMfaMutation,
   useDisableMfaMutation,
-  useLazyGenerateBackupCodesQuery,
+  useGenerateBackupCodesMutation,
 } = api;

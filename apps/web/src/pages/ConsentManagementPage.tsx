@@ -53,8 +53,9 @@ const readErrorText = (error: unknown): string => {
 };
 
 export const ConsentManagementPage = () => {
-  const { data: patients = [] } = useGetPatientsQuery();
-  const { data: consents = [], isLoading } = useGetConsentsQuery();
+  const { data: patients = [], error: patientsError } = useGetPatientsQuery();
+  const { data: consents = [], isLoading, error: consentsError } = useGetConsentsQuery();
+  const queryError = patientsError ?? consentsError;
   const [grantConsent, { isLoading: isGranting }] = useGrantConsentMutation();
   const [withdrawConsent, { isLoading: isWithdrawing }] = useWithdrawConsentMutation();
 
@@ -64,7 +65,16 @@ export const ConsentManagementPage = () => {
   const [expiryAt, setExpiryAt] = useState("");
   const [requestError, setRequestError] = useState<string | null>(null);
 
-  const canSubmit = selectedPatientId.trim().length > 0 && purpose.trim().length >= 2 && !isGranting;
+  const parsedDataTypes = dataTypesInput
+    .split(",")
+    .map((value) => value.trim())
+    .filter((value) => value.length > 0);
+
+  const canSubmit =
+    selectedPatientId.trim().length > 0 &&
+    purpose.trim().length >= 2 &&
+    parsedDataTypes.length > 0 &&
+    !isGranting;
 
   const activeConsentsCount = useMemo(
     () => consents.filter((record) => record.status === "GRANTED").length,
@@ -77,14 +87,15 @@ export const ConsentManagementPage = () => {
     setRequestError(null);
 
     try {
+      if (parsedDataTypes.length === 0) {
+        setRequestError("At least one data type is required.");
+        return;
+      }
       const expiryAtIso = expiryAt ? `${expiryAt}T23:59:59.999Z` : undefined;
       await grantConsent({
         patientId: selectedPatientId,
         purpose: purpose.trim(),
-        dataTypes: dataTypesInput
-          .split(",")
-          .map((value) => value.trim())
-          .filter((value) => value.length > 0),
+        dataTypes: parsedDataTypes,
         expiryAt: expiryAtIso,
       }).unwrap();
       setPurpose("");
@@ -269,6 +280,8 @@ export const ConsentManagementPage = () => {
               <TableBody>
                 {isLoading ? (
                   <TableRow><TableCell colSpan={6} align="center" sx={{ py: 8 }}><CircularProgress size={30} /></TableCell></TableRow>
+                ) : queryError ? (
+                  <TableRow><TableCell colSpan={6} align="center" sx={{ py: 8 }}><Typography color="error" sx={{ fontWeight: 700 }}>{readErrorText(queryError)}</Typography></TableCell></TableRow>
                 ) : consents.map((record: ConsentRecord) => {
                   const isRevoked = record.status === "REVOKED";
                   return (
@@ -332,7 +345,7 @@ export const ConsentManagementPage = () => {
                     </TableRow>
                   );
                 })}
-                {!isLoading && consents.length === 0 && (
+                {!isLoading && !queryError && consents.length === 0 && (
                   <TableRow><TableCell colSpan={6} align="center" sx={{ py: 10 }}><Typography sx={{ color: tokens.colors.onSurfaceVariant, fontWeight: 600 }}>No consent records available.</Typography></TableCell></TableRow>
                 )}
               </TableBody>

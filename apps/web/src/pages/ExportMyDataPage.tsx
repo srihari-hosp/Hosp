@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Alert, Box, Button, Paper, Stack, Typography, alpha, Grid } from "@mui/material";
 import { CloudDownload, PrivacyTip, History, Storage, PersonOutline } from "@mui/icons-material";
-import { useExportMyDataQuery } from "../store/api";
+import { useExportMyDataMutation } from "../store/api";
 import { tokens, glassmorphism } from "../theme/tokens";
 
 const buildDownloadName = (userId?: string): string => {
@@ -10,7 +10,7 @@ const buildDownloadName = (userId?: string): string => {
 };
 
 export const ExportMyDataPage = () => {
-  const { data, isLoading, error, refetch, isFetching } = useExportMyDataQuery();
+  const [exportData, { data, isLoading, error }] = useExportMyDataMutation();
 
   const errorMessage = useMemo(() => {
     if (!error) return null;
@@ -20,7 +20,7 @@ export const ExportMyDataPage = () => {
   }, [error]);
 
   const handleDownload = async () => {
-    const result = await refetch();
+    const result = await exportData();
     const payload = result.data ?? data;
     if (!payload) return;
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
@@ -81,7 +81,7 @@ export const ExportMyDataPage = () => {
                   disableElevation
                   startIcon={<CloudDownload />}
                   onClick={handleDownload}
-                  disabled={isLoading || isFetching}
+                  disabled={isLoading}
                   sx={{
                     borderRadius: "14px",
                     py: 2,
@@ -91,7 +91,7 @@ export const ExportMyDataPage = () => {
                     "&:hover": { bgcolor: tokens.colors.primaryContainer }
                   }}
                 >
-                  {isLoading || isFetching ? "Preparing secure package..." : "Generate & Download JSON Export"}
+                  {isLoading ? "Preparing secure package..." : "Generate & Download JSON Export"}
                 </Button>
 
                 {data?.exportedAt && (() => {

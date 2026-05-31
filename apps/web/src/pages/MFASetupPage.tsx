@@ -24,7 +24,7 @@ import {
   useDisableMfaMutation,
   useEnableMfaMutation,
   useGetMeQuery,
-  useLazyGenerateBackupCodesQuery,
+  useGenerateBackupCodesMutation,
   useSetupMfaMutation,
   useVerifyMfaMutation,
 } from "../store/api";
@@ -43,7 +43,7 @@ export const MFASetupPage = () => {
   const [verifyMfa, { isLoading: isVerifying }] = useVerifyMfaMutation();
   const [enableMfa, { isLoading: isEnabling }] = useEnableMfaMutation();
   const [disableMfa, { isLoading: isDisabling }] = useDisableMfaMutation();
-  const [generateBackupCodes, { isLoading: isGenerating }] = useLazyGenerateBackupCodesQuery();
+  const [generateBackupCodes, { isLoading: isGenerating }] = useGenerateBackupCodesMutation();
 
   const [code, setCode] = useState("");
   const [isVerified, setIsVerified] = useState(false);

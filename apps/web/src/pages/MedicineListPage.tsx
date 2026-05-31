@@ -137,16 +137,18 @@ export const MedicineListPage = () => {
   });
   const [getBatchesByMedicineIds] = useLazyGetBatchesByMedicineIdsQuery();
 
+  const medicineIdsKey = medicines.map(m => m.id).join(',');
+
   useEffect(() => {
-    if (medicines.length === 0) {
-      setBatchesByMedicine({});
+    if (!medicineIdsKey) {
+      setBatchesByMedicine((prev) => (Object.keys(prev).length === 0 ? prev : {}));
       return;
     }
     let isCurrent = true;
     const loadBatches = async () => {
       try {
         const grouped = await getBatchesByMedicineIds({ 
-          medicineIds: medicines.map(m => m.id), 
+          medicineIds: medicineIdsKey.split(','), 
           includeExpired: true 
         }, true).unwrap();
         if (!isCurrent) return;
@@ -159,7 +161,7 @@ export const MedicineListPage = () => {
     };
     void loadBatches();
     return () => { isCurrent = false; };
-  }, [batchRefreshKey, getBatchesByMedicineIds, medicines]);
+  }, [batchRefreshKey, getBatchesByMedicineIds, medicineIdsKey]);
 
   const summaries = useMemo(
     () => medicines.map((medicine) => summarizeMedicineStock(medicine, batchesByMedicine[medicine.id] ?? [])),

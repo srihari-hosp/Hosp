@@ -84,6 +84,7 @@ const openClientGeneratedPdf = async (
   const blob = await pdf(doc).toBlob();
   const blobUrl = URL.createObjectURL(blob);
   window.open(blobUrl, "_blank", "noopener,noreferrer");
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
 };
 
 const waitForQueuedPdf = async (
